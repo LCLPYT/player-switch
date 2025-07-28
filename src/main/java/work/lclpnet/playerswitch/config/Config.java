@@ -25,6 +25,12 @@ public class Config {
     @SerdeComment("The time after which to switch to the next player, in ticks")
     private int switchDelayTicks = Ticks.minutes(10);
 
+    @SerdeComment("This UUID will be assigned to every player, so that everyone has the same player and world data")
+    private UUID fixedUuid = UUID.fromString("a139e840-ff37-4cc7-a322-896af1a975f9");
+
+    @SerdeComment("This username will be assigned to every player")
+    private String fixedUsername = "Player";
+
     public Optional<UUID> getCurrentPlayerUuid() {
         if (participants.isEmpty()) {
             return Optional.empty();

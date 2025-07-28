@@ -1,8 +1,9 @@
 {
-  "player-switch.not_configured": "Die Spieler Wechsel Mod ist nicht konfiguriert",
+  "player-switch.not_configured": "Die Spielerwechsel Mod ist nicht konfiguriert",
   "player-switch.not_your_turn": "Du bist im Moment nicht dran",
   "player-switch.other_user_turn": "Aktuell ist %s dran",
   "player-switch.time_expired": "Deine Zeit ist abgelaufen",
   "player-switch.time_expired_other_user": "Deine Zeit ist abgelaufen, nun ist %s dran",
-  "player-switch.other_online": "Ein anderer Spieler ist noch online, bitte warte kurz"
+  "player-switch.other_online": "Ein anderer Spieler ist noch online, bitte warte kurz",
+  "player-switch.not_participating": "Du stehst nicht auf der Spielerwechsel Teilnehmerliste"
 }

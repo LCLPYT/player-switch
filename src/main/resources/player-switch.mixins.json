@@ -8,7 +8,9 @@
 		"PlayerManagerMixin",
 		"ServerConfigurationNetworkHandlerAccessor",
 		"ServerConfigurationNetworkHandlerMixin",
-		"ServerLoginNetworkHandlerMixin"
+		"ServerLoginNetworkHandlerMixin",
+		"ServerPlayerEntityMixin",
+		"ServerPlayNetworkHandlerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

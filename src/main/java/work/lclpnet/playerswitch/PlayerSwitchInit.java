@@ -15,19 +15,20 @@ import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.util.ModTranslations;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.util.MojangAPI;
+import work.lclpnet.playerswitch.util.PlayerUnifier;
 import work.lclpnet.playerswitch.util.PlayerUtil;
 import work.lclpnet.playerswitch.util.SwitchManager;
 
 import java.net.http.HttpClient;
 import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
 	public static final String MOD_ID = "player-switch";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	private SwitchManager manager;
-	private boolean setupSuccess = false;
+	private boolean setupSuccess = true;
 
 	@Override
 	public void onInitializeServer() {
@@ -43,8 +44,11 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 		var api = new MojangAPI(client);
 		var playerUtil = new PlayerUtil(api, LOGGER);
 
+		var unifier = new PlayerUnifier(configManager.config());
+		unifier.setup(hooks);
+
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-			manager = new SwitchManager(configManager, playerUtil, translations, server, LOGGER);
+			var manager = new SwitchManager(configManager, playerUtil, translations, server, LOGGER);
 
 			setupSuccess = manager.setup(scheduler, hooks);
 		});
@@ -56,7 +60,11 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 			server.stop(false);
 		});
 
+		AtomicBoolean destroyed = new AtomicBoolean(false);
+
 		Runnable shutdown = () -> {
+			if (destroyed.getAndSet(true)) return;
+
 			configManager.save();
 			configManager.close();
 			client.close();

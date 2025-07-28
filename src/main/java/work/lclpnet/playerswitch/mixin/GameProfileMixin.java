@@ -13,6 +13,8 @@ public class GameProfileMixin implements PlayerSwitchGameProfile {
 
     @Unique
     private WeakReference<Object> networkHandlerRef = null;
+    @Unique
+    private GameProfile realProfile = null;
 
     @Override
     public void playerSwitch$setNetworkHandler(Object networkHandler) {
@@ -23,5 +25,15 @@ public class GameProfileMixin implements PlayerSwitchGameProfile {
     public @Nullable Object playerSwitch$getNetworkHandler() {
         var ref = networkHandlerRef;
         return ref != null ? ref.get() : null;
+    }
+
+    @Override
+    public void playerSwitch$setRealGameProfile(GameProfile real) {
+        this.realProfile = real;
+    }
+
+    @Override
+    public GameProfile playerSwitch$getRealGameProfile() {
+        return realProfile;
     }
 }

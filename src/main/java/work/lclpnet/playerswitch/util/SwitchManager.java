@@ -69,7 +69,7 @@ public class SwitchManager {
 
     public boolean isCurrentPlayer(ServerPlayerEntity player) {
         return config.getCurrentPlayerUuid()
-                .map(uuid -> uuid.equals(player.getUuid()))
+                .map(uuid -> uuid.equals(PlayerUnifier.getRealUuid(player)))
                 .orElse(false);
     }
 
@@ -99,6 +99,10 @@ public class SwitchManager {
             return translations.translateText(language, "player-switch.other_online").formatted(YELLOW);
         }
 
+        if (!config.getParticipants().contains(gameProfile.getId())) {
+            return translations.translateText(language, "player-switch.not_participating").formatted(RED);
+        }
+
         return playerUtil.getUsername(uuid).join()
                 .map(name -> translations.translateText(language, "player-switch.other_user_turn", styled(name, YELLOW)).formatted(RED))
                 .orElseGet(() -> translations.translateText(language, "player-switch.not_your_turn").formatted(RED));
@@ -107,7 +111,6 @@ public class SwitchManager {
     private void tick() {
         int ticks = config.getElapsedTicks();
         int ticksLeft = config.getSwitchDelayTicks() - ticks;
-        System.out.println(ticksLeft);
 
         if (ticksLeft <= 0) {
             switchPlayer();
@@ -118,7 +121,9 @@ public class SwitchManager {
     }
 
     public Optional<ServerPlayerEntity> currentPlayer() {
-        return config.getCurrentPlayerUuid().map(uuid -> server.getPlayerManager().getPlayer(uuid));
+        return Optional.ofNullable(server.getPlayerManager().getPlayer(config.getFixedUuid()))
+                .filter(player -> PlayerUnifier.getRealUuid(player)
+                        .equals(config.getCurrentPlayerUuid().orElse(null)));
     }
 
     private void switchPlayer() {

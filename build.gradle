@@ -30,9 +30,9 @@ loom {
         }
     }
 
-    runs {
-        remove client
-    }
+//    runs {
+//        remove client
+//    }
 }
 
 dependencies {
