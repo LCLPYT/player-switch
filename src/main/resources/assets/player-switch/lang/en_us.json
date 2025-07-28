@@ -3,5 +3,6 @@
   "player-switch.not_your_turn": "It's not your turn currently,",
   "player-switch.other_user_turn": "It's %s's turn currently",
   "player-switch.time_expired": "Your turn is now over",
-  "player-switch.time_expired_other_user": "Your turn is now over, its %s's turn now"
+  "player-switch.time_expired_other_user": "Your turn is now over, its %s's turn now",
+  "player-switch.other_online": "Another player is still online, please wait a second"
 }

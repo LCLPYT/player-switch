@@ -1,6 +1,7 @@
 package work.lclpnet.playerswitch.util;
 
 import com.mojang.authlib.GameProfile;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerConfigurationNetworkHandler;
@@ -15,6 +16,8 @@ import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.playerswitch.PlayerSwitchInit;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.hook.PlayerCanJoinCallback;
+import work.lclpnet.playerswitch.hook.ServerPausedCallback;
+import work.lclpnet.playerswitch.hook.ServerTickPauseCallback;
 import work.lclpnet.playerswitch.mixin.ServerConfigurationNetworkHandlerAccessor;
 import work.lclpnet.playerswitch.type.PlayerSwitchGameProfile;
 
@@ -50,12 +53,24 @@ public class SwitchManager {
         }
 
         hooks.registerHook(PlayerCanJoinCallback.HOOK, this::checkCanJoin);
+        hooks.registerHook(ServerTickPauseCallback.HOOK, this::shouldPause);
+        hooks.registerHook(ServerPausedCallback.HOOK, server -> configManager.save());
 
         scheduler.interval(this::tick, 1);
 
         preloadUsername();
 
         return true;
+    }
+
+    private boolean shouldPause(MinecraftServer s) {
+        return PlayerLookup.all(s).isEmpty() || PlayerLookup.all(s).stream().noneMatch(this::isCurrentPlayer);
+    }
+
+    public boolean isCurrentPlayer(ServerPlayerEntity player) {
+        return config.getCurrentPlayerUuid()
+                .map(uuid -> uuid.equals(player.getUuid()))
+                .orElse(false);
     }
 
     private void preloadUsername() {
@@ -77,7 +92,11 @@ public class SwitchManager {
         }
 
         if (uuid.equals(gameProfile.getId())) {
-            return null;
+            if (PlayerLookup.all(server).isEmpty()) {
+                return null;
+            }
+
+            return translations.translateText(language, "player-switch.other_online").formatted(YELLOW);
         }
 
         return playerUtil.getUsername(uuid).join()
@@ -86,15 +105,16 @@ public class SwitchManager {
     }
 
     private void tick() {
-        int ticks = config.getCurrentTicks();
-        int ticksLeft = config.getSwitchTicks() - ticks;
+        int ticks = config.getElapsedTicks();
+        int ticksLeft = config.getSwitchDelayTicks() - ticks;
+        System.out.println(ticksLeft);
 
         if (ticksLeft <= 0) {
             switchPlayer();
             return;
         }
 
-        config.setCurrentTicks(ticks + 1);
+        config.setElapsedTicks(ticks + 1);
     }
 
     public Optional<ServerPlayerEntity> currentPlayer() {
@@ -110,6 +130,7 @@ public class SwitchManager {
 
         var prevPlayer = currentPlayer();
 
+        config.setElapsedTicks(0);
         config.setCurrentPlayer(nextPlayer);
 
         prevPlayer.ifPresent(this::disconnectPlayer);

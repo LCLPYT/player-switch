@@ -20,10 +20,10 @@ public class Config {
     private int currentPlayer = 0;
 
     @SerdeComment("The time the current player has player, in ticks")
-    private int currentTicks = 0;
+    private int elapsedTicks = 0;
 
     @SerdeComment("The time after which to switch to the next player, in ticks")
-    private int switchTicks = Ticks.minutes(10);
+    private int switchDelayTicks = Ticks.minutes(10);
 
     public Optional<UUID> getCurrentPlayerUuid() {
         if (participants.isEmpty()) {
