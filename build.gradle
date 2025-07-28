@@ -2,6 +2,7 @@ plugins {
 	id 'fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 	id 'gradle-build-utils' version '1.7.0'
+    id 'io.freefair.lombok' version '8.11'
 }
 
 Properties props = buildUtils.loadProperties('publish.properties')  // will be empty, if the file is missing
@@ -28,6 +29,10 @@ loom {
             sourceSet sourceSets.client
         }
     }
+
+    runs {
+        remove client
+    }
 }
 
 dependencies {
@@ -36,6 +41,11 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modImplementation "work.lclpnet.mods.kibu:kibu:${project.kibu_version}"
+
+    include(implementation('com.electronwill.night-config:core:3.8.1'))
+    include(implementation('com.electronwill.night-config:toml:3.8.1'))
+    include(implementation('org.json:json:20250107'))
 }
 
 processResources {

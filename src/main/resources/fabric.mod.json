@@ -15,7 +15,7 @@
 	"icon": "assets/player-switch/icon.png",
 	"environment": "*",
 	"entrypoints": {
-		"main": ["work.lclpnet.playerswitch.PlayerSwitchInit"]
+		"server": ["work.lclpnet.playerswitch.PlayerSwitchInit"]
 	},
 	"mixins": [
 		"player-switch.mixins.json"

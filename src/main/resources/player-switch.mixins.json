@@ -3,6 +3,11 @@
 	"package": "work.lclpnet.playerswitch.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
+		"GameProfileMixin",
+		"PlayerManagerMixin",
+		"ServerConfigurationNetworkHandlerAccessor",
+		"ServerConfigurationNetworkHandlerMixin",
+		"ServerLoginNetworkHandlerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
