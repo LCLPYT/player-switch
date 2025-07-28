@@ -117,6 +117,11 @@ public class SwitchManager {
             return;
         }
 
+        currentPlayer().ifPresent(player -> {
+            int secondsLeft = ticksLeft / 20;
+            TimeHelper.formatTime(translations, secondsLeft).formatted(AQUA).sendTo(player, true);
+        });
+
         config.setElapsedTicks(ticks + 1);
     }
 

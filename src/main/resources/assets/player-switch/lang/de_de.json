@@ -5,5 +5,7 @@
   "player-switch.time_expired": "Deine Zeit ist abgelaufen",
   "player-switch.time_expired_other_user": "Deine Zeit ist abgelaufen, nun ist %s dran",
   "player-switch.other_online": "Ein anderer Spieler ist noch online, bitte warte kurz",
-  "player-switch.not_participating": "Du stehst nicht auf der Spielerwechsel Teilnehmerliste"
+  "player-switch.not_participating": "Du stehst nicht auf der Spielerwechsel Teilnehmerliste",
+  "player-switch.time.seconds": "%s s",
+  "player-switch.time.minutes_seconds": "%s:%s min"
 }
