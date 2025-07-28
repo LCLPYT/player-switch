@@ -12,7 +12,7 @@ public class TimeHelper {
         seconds %= 60;
 
         if (minutes > 0) {
-            return translations.translateText("layer-switch.time.minutes_seconds", new Object[]{
+            return translations.translateText("player-switch.time.minutes_seconds", new Object[]{
                     String.format("%02d", minutes), String.format("%02d", seconds)
             });
         }
