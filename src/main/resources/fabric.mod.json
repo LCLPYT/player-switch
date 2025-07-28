@@ -1,40 +1,28 @@
 {
 	"schemaVersion": 1,
-	"id": "testmod",
+	"id": "player-switch",
 	"version": "${version}",
-	"name": "Test Mod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "Player Switch",
+	"description": "Switches the active player after set time intervals. Only one player can play the game at a time.",
 	"authors": [
-		"Me!"
+		"LCLP"
 	],
 	"contact": {
-		"homepage": "https://github.com/LCLPYT/fabric-mod-boilerplate",
-		"sources": "https://github.com/LCLPYT/fabric-mod-boilerplate"
+		"homepage": "https://github.com/LCLPYT/player-switch",
+		"sources": "https://github.com/LCLPYT/player-switch"
 	},
-	"license": "CC0-1.0",
-	"icon": "assets/testmod/icon.png",
+	"license": "MIT",
+	"icon": "assets/player-switch/icon.png",
 	"environment": "*",
 	"entrypoints": {
-		"main": [
-			"com.example.ExampleMod"
-		],
-		"client": [
-			"com.example.ExampleModClient"
-		],
-		"fabric-datagen": [
-			"com.example.ExampleModDataGenerator"
-		]
+		"main": ["work.lclpnet.playerswitch.PlayerSwitchInit"]
 	},
 	"mixins": [
-		"testmod.mixins.json",
-		{
-			"config": "testmod.client.mixins.json",
-			"environment": "client"
-		}
+		"player-switch.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.16.14",
-		"minecraft": "~1.21.7",
+		"minecraft": "~1.21.8",
 		"java": ">=21",
 		"fabric-api": "*"
 	},
