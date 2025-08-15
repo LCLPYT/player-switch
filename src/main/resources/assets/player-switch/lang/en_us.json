@@ -7,5 +7,7 @@
   "player-switch.other_online": "Another player is still online, please wait a second",
   "player-switch.not_participating": "You are not on the Player Switch participants list",
   "player-switch.time.seconds": "%s s",
-  "player-switch.time.minutes_seconds": "%s:%s min"
+  "player-switch.time.minutes_seconds": "%s:%s min",
+  "player-switch.time.hours_minutes_seconds": "%s:%s:%s h",
+  "player-switch.time.days_hours_minutes_seconds": "%s d %s:%s:%s h"
 }

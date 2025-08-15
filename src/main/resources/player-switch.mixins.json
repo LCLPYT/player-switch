@@ -1,18 +1,18 @@
 {
-	"required": true,
-	"package": "work.lclpnet.playerswitch.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-		"GameProfileMixin",
-		"MinecraftServerMixin",
-		"PlayerManagerMixin",
-		"ServerConfigurationNetworkHandlerAccessor",
-		"ServerConfigurationNetworkHandlerMixin",
-		"ServerLoginNetworkHandlerMixin",
-		"ServerPlayerEntityMixin",
-		"ServerPlayNetworkHandlerMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
+  "required": true,
+  "package": "work.lclpnet.playerswitch.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "GameProfileMixin",
+    "MinecraftServerMixin",
+    "PlayerManagerMixin",
+    "ServerConfigurationNetworkHandlerAccessor",
+    "ServerConfigurationNetworkHandlerMixin",
+    "ServerLoginNetworkHandlerMixin",
+    "ServerPlayerEntityMixin",
+    "ServerPlayNetworkHandlerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
 	}
 }

@@ -1,6 +1,8 @@
 package work.lclpnet.playerswitch.mixin;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerMetadata;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -10,15 +12,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import work.lclpnet.playerswitch.PlayerSwitchInit;
 import work.lclpnet.playerswitch.hook.ServerPausedCallback;
 import work.lclpnet.playerswitch.hook.ServerTickPauseCallback;
+import work.lclpnet.playerswitch.type.PlayerSwitchMinecraftServer;
 
 import java.util.function.BooleanSupplier;
 
 @Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin {
+public abstract class MinecraftServerMixin implements PlayerSwitchMinecraftServer {
 
     @Shadow protected abstract void runAutosave();
 
     @Shadow public abstract void tickNetworkIo();
+
+    @Shadow
+    private @Nullable ServerMetadata metadata;
+
+    @Shadow
+    protected abstract ServerMetadata createMetadata();
 
     @Unique
     private boolean paused = false;
@@ -47,5 +56,10 @@ public abstract class MinecraftServerMixin {
 
         tickNetworkIo();
         ci.cancel();
+    }
+
+    @Override
+    public void playerSwitch$updateMetadata() {
+        metadata = createMetadata();
     }
 }

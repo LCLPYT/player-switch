@@ -24,11 +24,15 @@ import work.lclpnet.playerswitch.type.PlayerSwitchGameProfile;
 import java.net.SocketAddress;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
+import static java.lang.Math.max;
 import static net.minecraft.util.Formatting.*;
 import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 
 public class SwitchManager {
+
+    private static final int MOTD_UPDATE_TICKS = 20;
 
     private final ConfigManager<Config> configManager;
     private final Config config;
@@ -36,6 +40,9 @@ public class SwitchManager {
     private final Translations translations;
     private final MinecraftServer server;
     private final Logger logger;
+    private final ServerMotd motd;
+
+    private int motdUpdateTimer = 0;
 
     public SwitchManager(ConfigManager<Config> configManager, PlayerUtil playerUtil, Translations translations, MinecraftServer server, Logger logger) {
         this.configManager = configManager;
@@ -44,6 +51,7 @@ public class SwitchManager {
         this.translations = translations;
         this.server = server;
         this.logger = logger;
+        motd = new ServerMotd(server, translations, configManager);
     }
 
     public boolean setup(TaskScheduler scheduler, HookRegistrar hooks) {
@@ -58,7 +66,7 @@ public class SwitchManager {
 
         scheduler.interval(this::tick, 1);
 
-        preloadUsername();
+        update();
 
         return true;
     }
@@ -73,8 +81,8 @@ public class SwitchManager {
                 .orElse(false);
     }
 
-    private void preloadUsername() {
-        config.getCurrentPlayerUuid().ifPresent(playerUtil::getUsername);
+    private Optional<CompletableFuture<Optional<String>>> preloadUsername() {
+        return config.getCurrentPlayerUuid().map(playerUtil::getUsername);
     }
 
     private @Nullable Text checkCanJoin(SocketAddress socketAddress, GameProfile gameProfile) {
@@ -110,9 +118,9 @@ public class SwitchManager {
 
     private void tick() {
         int ticks = config.getElapsedTicks();
-        int ticksLeft = config.getSwitchDelayTicks() - ticks;
+        int ticksLeft = max(0, config.getSwitchDelayTicks() - ticks);
 
-        if (ticksLeft <= 0) {
+        if (ticksLeft == 0) {
             switchPlayer();
             return;
         }
@@ -125,12 +133,38 @@ public class SwitchManager {
         }
 
         config.setElapsedTicks(ticks + 1);
+        config.setTotalTicks(config.getTotalTicks() + 1);
+
+        if (config.isUpdateMotd() && motdUpdateTimer++ >= MOTD_UPDATE_TICKS) {
+            motdUpdateTimer = 0;
+            updateMotd();
+        }
     }
 
     public Optional<ServerPlayerEntity> currentPlayer() {
         return Optional.ofNullable(server.getPlayerManager().getPlayer(config.getFixedUuid()))
                 .filter(player -> PlayerUnifier.getRealUuid(player)
                         .equals(config.getCurrentPlayerUuid().orElse(null)));
+    }
+
+    public void update() {
+        if (config.isUpdateMotd()) {
+            updateMotd();
+        }
+    }
+
+    private void updateMotd() {
+        preloadUsername().ifPresentOrElse(
+                future -> future.thenAccept(opt -> opt.ifPresentOrElse(
+                        motd::currentlyPlaying,
+                        () -> motd.currentlyPlaying("?")
+                )).exceptionally(t -> {
+                    logger.error("Failed to preload username", t);
+                    motd.setMotd(motd.firstLine());
+                    return null;
+                }),
+                motd::noParticipants
+        );
     }
 
     private void switchPlayer() {
@@ -148,6 +182,8 @@ public class SwitchManager {
         prevPlayer.ifPresent(this::disconnectPlayer);
 
         configManager.save();
+
+        update();
     }
 
     private void disconnectPlayer(ServerPlayerEntity player) {
