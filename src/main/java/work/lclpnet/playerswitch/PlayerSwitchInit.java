@@ -57,7 +57,7 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
 			if (setupSuccess) return;
 
-			LOGGER.error("Shutting down server as player-switch is not configured");
+			LOGGER.error("Shutting down server as player-switch is not configured. For more information, see https://github.com/LCLPYT/player-switch");
 			server.stop(false);
 		});
 

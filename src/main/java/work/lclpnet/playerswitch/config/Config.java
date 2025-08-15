@@ -32,7 +32,7 @@ public class Config {
     private String fixedUsername = "Player";
 
     @SerdeComment("A Discord Webhook can be configured so that notifications about new turns are sent to a Discord channel. Participants that have a Discord user ID defined will be pinged when it's their turn.")
-    private DiscordWebhookConfig discordWebhook;
+    private final DiscordWebhookConfig discordWebhook = new DiscordWebhookConfig();
 
     public Optional<PlayerEntry> getCurrentPlayerEntry() {
         if (participants.isEmpty()) {
