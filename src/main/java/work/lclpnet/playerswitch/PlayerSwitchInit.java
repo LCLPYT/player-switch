@@ -15,10 +15,7 @@ import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.util.ModTranslations;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.config.ConfigValidator;
-import work.lclpnet.playerswitch.util.MojangAPI;
-import work.lclpnet.playerswitch.util.PlayerUnifier;
-import work.lclpnet.playerswitch.util.PlayerUtil;
-import work.lclpnet.playerswitch.util.SwitchManager;
+import work.lclpnet.playerswitch.util.*;
 
 import java.net.http.HttpClient;
 import java.nio.file.Path;
@@ -36,7 +33,6 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
         var client = HttpClient.newHttpClient();
         var api = new MojangAPI(client);
 
-		@SuppressWarnings("resource")
         var configManager = loadConfig(api);
 
 		var scheduler = new Scheduler(LOGGER);
@@ -50,8 +46,10 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 		var unifier = new PlayerUnifier(configManager.config());
 		unifier.setup(hooks);
 
+        var discordWebhook = new DiscordWebhook(configManager, client, translations, playerUtil, LOGGER);
+
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-			var manager = new SwitchManager(configManager, playerUtil, translations, server, LOGGER);
+			var manager = new SwitchManager(configManager, playerUtil, translations, server, discordWebhook, LOGGER);
 
 			setupSuccess = manager.setup(scheduler, hooks);
 		});

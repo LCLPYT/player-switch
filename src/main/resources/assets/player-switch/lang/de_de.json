@@ -7,5 +7,8 @@
   "player-switch.other_online": "Ein anderer Spieler ist noch online, bitte warte kurz",
   "player-switch.not_participating": "Du stehst nicht auf der Spielerwechsel Teilnehmerliste",
   "player-switch.time.seconds": "%s s",
-  "player-switch.time.minutes_seconds": "%s:%s min"
+  "player-switch.time.minutes_seconds": "%s:%s min",
+  "player-switch.discord.your_turn_mention": "<@%s> Du bist jetzt an der Reihe!",
+  "player-switch.discord.your_turn": "%s ist nun an der Reihe.",
+  "player-switch.discord.next_turn": "Der nächste Spieler ist nun an der Reihe"
 }

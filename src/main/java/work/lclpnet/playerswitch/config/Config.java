@@ -31,14 +31,18 @@ public class Config {
     @SerdeComment("This username will be assigned to every player")
     private String fixedUsername = "Player";
 
-    @SerdeComment("Discord Webhook URL to send messages to when a turn ended. Participants that have a discord user ID defined will be pinged when it's their turn.")
-    private String discordWebhookUrl = "";
+    @SerdeComment("A Discord Webhook can be configured so that notifications about new turns are sent to a Discord channel. Participants that have a Discord user ID defined will be pinged when it's their turn.")
+    private DiscordWebhookConfig discordWebhook;
 
-    public Optional<UUID> getCurrentPlayerUuid() {
+    public Optional<PlayerEntry> getCurrentPlayerEntry() {
         if (participants.isEmpty()) {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(participants.get(currentPlayer)).map(PlayerEntry::getUuid);
+        return Optional.ofNullable(participants.get(currentPlayer));
+    }
+
+    public Optional<UUID> getCurrentPlayerUuid() {
+        return getCurrentPlayerEntry().map(PlayerEntry::getUuid);
     }
 }

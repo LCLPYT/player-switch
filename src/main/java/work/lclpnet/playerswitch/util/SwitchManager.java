@@ -35,14 +35,17 @@ public class SwitchManager {
     private final PlayerUtil playerUtil;
     private final Translations translations;
     private final MinecraftServer server;
+    private final DiscordWebhook discordWebhook;
     private final Logger logger;
 
-    public SwitchManager(ConfigManager<Config> configManager, PlayerUtil playerUtil, Translations translations, MinecraftServer server, Logger logger) {
+    public SwitchManager(ConfigManager<Config> configManager, PlayerUtil playerUtil, Translations translations,
+                         MinecraftServer server, DiscordWebhook discordWebhook, Logger logger) {
         this.configManager = configManager;
         this.config = configManager.config();
         this.playerUtil = playerUtil;
         this.translations = translations;
         this.server = server;
+        this.discordWebhook = discordWebhook;
         this.logger = logger;
     }
 
@@ -99,7 +102,7 @@ public class SwitchManager {
             return translations.translateText(language, "player-switch.other_online").formatted(YELLOW);
         }
 
-        if (!config.getParticipants().contains(gameProfile.getId())) {
+        if (config.getParticipants().stream().noneMatch(entry -> gameProfile.getId().equals(entry.getUuid()))) {
             return translations.translateText(language, "player-switch.not_participating").formatted(RED);
         }
 
@@ -148,6 +151,8 @@ public class SwitchManager {
         prevPlayer.ifPresent(this::disconnectPlayer);
 
         configManager.save();
+
+        discordWebhook.sendNotification();
     }
 
     private void disconnectPlayer(ServerPlayerEntity player) {
