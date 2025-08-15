@@ -29,7 +29,7 @@ public class ConfigValidator {
         for (PlayerEntry entry : configManager.config().getParticipants()) {
             validateEntry(entry, i);
 
-            if (entry.getUuid() == null) {
+            if (entry.getUuid() == PlayerEntry.NULL_UUID) {
                 missingUuid.add(entry);
             }
 
@@ -46,7 +46,9 @@ public class ConfigValidator {
 
         List<String> names = missingUuid.stream()
                 .map(PlayerEntry::getName)
-                .map(Objects::requireNonNull)
+                .peek(s -> {
+                    if (s.isEmpty()) throw new IllegalStateException("Username is null");
+                })
                 .distinct()
                 .toList();
 
@@ -55,7 +57,9 @@ public class ConfigValidator {
         Map<String, UUID> uuids = fetchUuids(names);
 
         for (PlayerEntry entry : missingUuid) {
-            String name = Objects.requireNonNull(entry.getName());
+            String name = entry.getName();
+
+            if (name.isBlank()) throw new IllegalArgumentException("Player name is blank");
 
             UUID uuid = uuids.get(name);
 
@@ -98,7 +102,7 @@ public class ConfigValidator {
     }
 
     private void validateEntry(PlayerEntry entry, int i) {
-        if (entry.getUuid() == null && entry.getName() == null) {
+        if (entry.getUuid() == PlayerEntry.NULL_UUID && entry.getName().isBlank()) {
             throw new RuntimeException("Invalid config: Participant %s has neither uuid nor name set.".formatted(i));
         }
     }

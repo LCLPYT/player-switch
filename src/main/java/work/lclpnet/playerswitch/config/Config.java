@@ -31,6 +31,9 @@ public class Config {
     @SerdeComment("This username will be assigned to every player")
     private String fixedUsername = "Player";
 
+    @SerdeComment("Discord Webhook URL to send messages to when a turn ended. Participants that have a discord user ID defined will be pinged when it's their turn.")
+    private String discordWebhookUrl = "";
+
     public Optional<UUID> getCurrentPlayerUuid() {
         if (participants.isEmpty()) {
             return Optional.empty();
