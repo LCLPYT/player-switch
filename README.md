@@ -3,9 +3,10 @@ A Fabric mod for Minecraft: Java Edition that switches the active player after s
 Only one player can play the game at a time.
 
 ## Configuration
-If you start the server without configuring the participants, you'll get an error like: "No participants are configured. Please modify ./config/player-switch/config.toml".
+> [!IMPORTANT]
+> If you start the server without configuring the participants, you'll get an error like: "No participants are configured. Please modify ./config/player-switch/config.toml first!
+> To fix this, you'll need to configure at least the participants in `config/player-switch/config.toml`
 
-To fix this, you'll need to configure at least the participants in `config/player-switch/config.toml`:
 ```toml
 #Define all players that should participate in this file.
 #Players will take turns in the order they occur in this file.
