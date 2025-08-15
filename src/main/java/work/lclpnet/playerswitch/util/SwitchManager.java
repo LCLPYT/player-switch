@@ -175,6 +175,8 @@ public class SwitchManager {
     }
 
     private void updateMotd(String username) {
+        if (server.getPlayerManager() == null) return;
+
         if (PlayerLookup.all(server).isEmpty()) {
             motd.currentlyWaiting(username);
         } else {

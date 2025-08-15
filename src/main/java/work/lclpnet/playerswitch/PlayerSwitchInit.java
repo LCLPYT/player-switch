@@ -26,8 +26,6 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 	public static final String MOD_ID = "player-switch";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	private boolean setupSuccess = true;
-
 	@Override
 	public void onInitializeServer() {
         var client = HttpClient.newHttpClient();
@@ -48,13 +46,11 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
         var discordWebhook = new DiscordWebhook(configManager, client, translations, playerUtil, LOGGER);
 
-		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-			var manager = new SwitchManager(configManager, playerUtil, translations, server, discordWebhook, LOGGER);
-
-			setupSuccess = manager.setup(scheduler, hooks);
-		});
-
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            var manager = new SwitchManager(configManager, playerUtil, translations, server, discordWebhook, LOGGER);
+
+            boolean setupSuccess = manager.setup(scheduler, hooks);
+
 			if (setupSuccess) return;
 
 			LOGGER.error("Shutting down server as player-switch is not configured. For more information, see https://github.com/LCLPYT/player-switch");
