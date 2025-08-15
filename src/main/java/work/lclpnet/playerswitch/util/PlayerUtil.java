@@ -1,6 +1,7 @@
 package work.lclpnet.playerswitch.util;
 
 import org.slf4j.Logger;
+import work.lclpnet.playerswitch.config.PlayerEntry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,5 +36,15 @@ public class PlayerUtil {
                     logger.error("Failed to fetch username", t);
                     return Optional.empty();
                 }));
+    }
+
+    public CompletableFuture<Optional<String>> getUsername(PlayerEntry entry) {
+        String subname = entry.getDisplayName();
+
+        if (!subname.isBlank()) {
+            return CompletableFuture.completedFuture(Optional.of(subname));
+        }
+
+        return getUsername(entry.getUuid());
     }
 }

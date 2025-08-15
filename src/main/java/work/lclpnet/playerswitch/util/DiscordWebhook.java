@@ -50,15 +50,15 @@ public class DiscordWebhook {
         String discordUserId = playerEntry.getDiscordId();
 
         if (discordUserId.isBlank()) {
-            playerUtil.getUsername(playerEntry.getUuid()).thenAccept(opt -> {
-                JSONObject msg = opt.or(() -> Optional.of(playerEntry.getName()).filter(s -> !s.isBlank()))
+            playerUtil.getUsername(playerEntry).thenAccept(optName -> {
+                JSONObject msg = optName.or(() -> Optional.of(playerEntry.getName()).filter(s -> !s.isBlank()))
                         .map(username -> getTurnMessage(username, language))
                         .orElseGet(() -> getTurnMessageWithoutUser(language));
 
                 sendAsync(uri, msg.toString());
             });
         } else {
-            var msg = getTurnMessageWithMention(discordUserId, language);
+            var msg = getTurnMessageWithMention(discordUserId, playerEntry.getDisplayName(), language);
 
             sendAsync(uri, msg.toString());
         }
@@ -71,15 +71,18 @@ public class DiscordWebhook {
     }
 
     private JSONObject getTurnMessage(String username, String language) {
-        String msg = translations.translate(language, "player-switch.discord.your_turn")
+        String msg = translations.translate(language, "player-switch.discord.player_turn")
                 .formatted(username);
 
         return getMessage(msg);
     }
 
-    private @NotNull JSONObject getTurnMessageWithMention(String discordUserId, String language) {
-        String msg = translations.translate(language, "player-switch.discord.your_turn_mention")
-                .formatted(discordUserId);
+    private @NotNull JSONObject getTurnMessageWithMention(String discordUserId, String subname, String language) {
+        String msg = subname.isBlank()
+                ? translations.translate(language, "player-switch.discord.your_turn_mention")
+                .formatted(discordUserId)
+                : translations.translate(language, "player-switch.discord.player_turn_mention")
+                .formatted(discordUserId, subname);
 
         var users = new JSONArray();
         users.put(discordUserId);

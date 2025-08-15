@@ -24,6 +24,10 @@ public class PlayerEntry {
     @SerdeSkipSerializingIf(SerdeSkipSerializingIf.SkipSerIf.IS_NULL)
     private String discordId = "";
 
+    @SerdeSkipDeserializingIf(SerdeSkipDeserializingIf.SkipDeIf.IS_MISSING)
+    @SerdeSkipSerializingIf(SerdeSkipSerializingIf.SkipSerIf.IS_NULL)
+    private String displayName = "";
+
     public static PlayerEntry of(String name) {
         var entry = new PlayerEntry();
         entry.setName(name);

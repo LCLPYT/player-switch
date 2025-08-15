@@ -11,12 +11,27 @@ Only one player can play the game at a time.
 #Define all players that should participate in the challenge in this file.
 #Players will take turns in the order they occur in this file.
 #You can simply define a player by their Minecraft username.
-#Just add an entry like this for every player:
+#Just add simple entry like this for every player:
 [[participants]]
-name = "jeb_"
+    name = "jeb_"
 
+#You can also create more advanced entries:
 [[participants]]
-name = "Notch"
+    #The Minecraft username of the participant
+    #Optional if you configure the UUID instead.
+    name = "Notch"
+
+    #You can also use the UUID of the participant's Minecraft account. 
+    #If not set, the UUID will automatically be fetched from the name.
+    uuid = "069a79f4-44e9-4726-a5be-fca90e38aaf5"
+
+    #The Discord user id. If the Discord webhook is configured, the participant will be pinged with this user id.
+    #If unset, the Minecraft username will be used and nobody will be pinged.
+    discordId = "000000000000000000"
+
+    #Can be used to override the name displayed for this user.
+    #It's also useful when multiple people play with the same account.
+    displayName = "Markus"
 
 #-----------------------------------------------------
 #Additional configuration (optional)
@@ -45,10 +60,10 @@ fixedUuid = "a139e840-ff37-4cc7-a322-896af1a975f9"
     #The language to use for the message of the day
     language = "en_us"
 
-#A Discord Webhook can be configured so that notifications about new turns are sent to a Discord channel. 
+#A Discord webhook can be configured so that notifications about new turns are sent to a Discord channel. 
 #Participants that have a Discord user ID defined will also be pinged when it's their turn.
 [discordWebhook]
-    #The Discord Webhook url. Can be retrieved by creating a Webhook in the "Integration" tab of the server settings.
+    #The Discord webhook url. Can be retrieved by creating a Webhook in the "Integration" tab of the server settings.
     url = ""
 
     #The language to use for Discord messages
@@ -58,7 +73,7 @@ fixedUuid = "a139e840-ff37-4cc7-a322-896af1a975f9"
 ## Troubleshooting
 ### The server fails to start with player-switch installed.
 Make sure to configure at least one participant. 
-The server will only allow the configured participants to join.
+The server will allow only the configured participants to join.
 When you are adding the participants definitions, make sure to delete the pre-generated participant definition:
 
 ```diff

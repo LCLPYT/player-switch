@@ -17,6 +17,7 @@ import work.lclpnet.kibu.scheduler.api.TaskScheduler;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.playerswitch.PlayerSwitchInit;
 import work.lclpnet.playerswitch.config.Config;
+import work.lclpnet.playerswitch.config.PlayerEntry;
 import work.lclpnet.playerswitch.hook.PlayerCanJoinCallback;
 import work.lclpnet.playerswitch.hook.ServerPausedCallback;
 import work.lclpnet.playerswitch.hook.ServerTickPauseCallback;
@@ -25,7 +26,6 @@ import work.lclpnet.playerswitch.type.PlayerSwitchGameProfile;
 
 import java.net.SocketAddress;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.Math.max;
@@ -89,7 +89,7 @@ public class SwitchManager {
     }
 
     private Optional<CompletableFuture<Optional<String>>> preloadUsername() {
-        return config.getCurrentPlayerUuid().map(playerUtil::getUsername);
+        return config.getCurrentPlayerEntry().map(playerUtil::getUsername);
     }
 
     private @Nullable Text checkCanJoin(SocketAddress socketAddress, GameProfile gameProfile) {
@@ -100,13 +100,13 @@ public class SwitchManager {
         SyncedClientOptions syncedOptions = ((ServerConfigurationNetworkHandlerAccessor) handler).getSyncedOptions();
         String language = syncedOptions != null ? syncedOptions.language() : "en_us";
 
-        UUID uuid = config.getCurrentPlayerUuid().orElse(null);
+        PlayerEntry entry = config.getCurrentPlayerEntry().orElse(null);
 
-        if (uuid == null) {
+        if (entry == null) {
             return translations.translateText(language, "player-switch.not_configured").formatted(RED);
         }
 
-        if (uuid.equals(gameProfile.getId())) {
+        if (entry.getUuid().equals(gameProfile.getId())) {
             if (PlayerLookup.all(server).isEmpty()) {
                 return null;
             }
@@ -114,11 +114,11 @@ public class SwitchManager {
             return translations.translateText(language, "player-switch.other_online").formatted(YELLOW);
         }
 
-        if (config.getParticipants().stream().noneMatch(entry -> gameProfile.getId().equals(entry.getUuid()))) {
+        if (config.getParticipants().stream().noneMatch(pe -> gameProfile.getId().equals(pe.getUuid()))) {
             return translations.translateText(language, "player-switch.not_participating").formatted(RED);
         }
 
-        return playerUtil.getUsername(uuid).join()
+        return playerUtil.getUsername(entry).join()
                 .map(name -> translations.translateText(language, "player-switch.other_user_turn", styled(name, YELLOW)).formatted(RED))
                 .orElseGet(() -> translations.translateText(language, "player-switch.not_your_turn").formatted(RED));
     }
@@ -202,8 +202,8 @@ public class SwitchManager {
     }
 
     private void disconnectPlayer(ServerPlayerEntity player) {
-        Text msg = config.getCurrentPlayerUuid()
-                .flatMap(uuid -> playerUtil.getUsername(uuid).join())
+        Text msg = config.getCurrentPlayerEntry()
+                .flatMap(entry -> playerUtil.getUsername(entry).join())
                 .map(name -> translations.translateText(player, "player-switch.time_expired_other_user", styled(name, YELLOW)).formatted(GRAY))
                 .orElseGet(() -> translations.translateText(player, "player-switch.time_expired").formatted(GRAY));
 
