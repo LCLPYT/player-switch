@@ -9,5 +9,9 @@
   "player-switch.time.seconds": "%s s",
   "player-switch.time.minutes_seconds": "%s:%s min",
   "player-switch.time.hours_minutes_seconds": "%s:%s:%s h",
-  "player-switch.time.days_hours_minutes_seconds": "%s d %s:%s:%s h"
+  "player-switch.time.days_hours_minutes_seconds": "%s d %s:%s:%s h",
+  "player-switch.motd.subject": "Player-Switch challenge",
+  "player-switch.motd.now_playing": "Now playing: %s",
+  "player-switch.motd.time_left": "%s left",
+  "player-switch.motd.waiting": "Waiting for %s ..."
 }

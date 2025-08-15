@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import static java.lang.Math.max;
 import static net.minecraft.util.Formatting.*;
+import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 import static work.lclpnet.playerswitch.util.TimeHelper.formatTime;
 
 public class ServerMotd {
@@ -30,46 +31,47 @@ public class ServerMotd {
 
     public MutableText firstLine() {
         Config config = configManager.config();
+        String language = config.getMotd().getLanguage();
 
         String totalTime = formatTime(translations, config.getTotalTicks())
-                .translateTo("en_us")
+                .translateTo(language)
                 .getString();
 
         return Text.empty()
-                .append(Text.literal("Player-Switch challenge").formatted(GREEN))
+                .append(translations.translateText(language, "player-switch.motd.subject").formatted(GREEN))
                 .append(Text.literal(" | ").formatted(DARK_GREEN, BOLD))
                 .append(Text.literal('«' + totalTime + '»').formatted(GOLD));
     }
 
     public void currentlyPlaying(String username) {
         Config config = configManager.config();
+        String language = config.getMotd().getLanguage();
 
         int remainingTicks = max(0, config.getSwitchDelayTicks() - config.getElapsedTicks());
 
         String turnTimeRemaining = formatTime(translations, remainingTicks)
-                .translateTo("en_us")
+                .translateTo(language)
                 .getString();
 
-        var msg = firstLine()
-                .append("\n")
-                .append(Text.literal("Now playing: ").formatted(AQUA))
-                .append(Text.literal(username).formatted(YELLOW));
+        var msg = firstLine().append("\n").append(translations.translateText(
+                language, "player-switch.motd.now_playing", styled(username, YELLOW)
+        ).formatted(AQUA));
 
         if (config.getParticipants().size() > 1) {
-            msg.append(Text.literal(" ").formatted(AQUA)
-                    .append("(")
-                    .append(Text.literal(turnTimeRemaining).formatted(YELLOW))
-                    .append(" left)"));
+            msg.append(" ").append(translations.translateText(
+                    language, "player-switch.motd.time_left", styled(turnTimeRemaining, YELLOW)
+            ).formatted(AQUA));
         }
 
         setMotd(msg);
     }
 
     public void currentlyWaiting(String username) {
-        var msg = firstLine()
-                .append("\n")
-                .append(Text.literal("Waiting for: ").formatted(AQUA))
-                .append(Text.literal(username).formatted(YELLOW));
+        String language = configManager.config().getMotd().getLanguage();
+
+        var msg = firstLine().append("\n").append(translations.translateText(
+                language, "player-switch.motd.waiting", styled(username, YELLOW)
+        ).formatted(RED, ITALIC));
 
         setMotd(msg);
     }

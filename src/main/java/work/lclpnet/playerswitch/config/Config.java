@@ -31,11 +31,11 @@ public class Config {
     @SerdeComment("This username will be assigned to every player")
     private String fixedUsername = "Player";
 
-    @SerdeComment("Whether to set the message of the day (MOTD) according to the player who turn it is.")
-    private boolean updateMotd = true;
-
     @SerdeComment("Total challenge time, in ticks")
     private long totalTicks = 0;
+
+    @SerdeComment("Message of the day options")
+    private MotdConfig motd = new MotdConfig();
 
     public Optional<UUID> getCurrentPlayerUuid() {
         if (participants.isEmpty()) {

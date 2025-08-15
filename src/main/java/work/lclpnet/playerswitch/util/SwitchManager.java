@@ -135,7 +135,7 @@ public class SwitchManager {
         config.setElapsedTicks(ticks + 1);
         config.setTotalTicks(config.getTotalTicks() + 1);
 
-        if (config.isUpdateMotd() && motdUpdateTimer++ >= MOTD_UPDATE_TICKS) {
+        if (config.getMotd().isEnabled() && motdUpdateTimer++ >= MOTD_UPDATE_TICKS) {
             motdUpdateTimer = 0;
             updateMotd();
         }
@@ -148,7 +148,7 @@ public class SwitchManager {
     }
 
     public void update() {
-        if (config.isUpdateMotd()) {
+        if (config.getMotd().isEnabled()) {
             updateMotd();
         }
     }
