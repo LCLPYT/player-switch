@@ -1,30 +1,31 @@
 {
-	"schemaVersion": 1,
-	"id": "player-switch",
-	"version": "${version}",
-	"name": "Player Switch",
-	"description": "Switches the active player after set time intervals. Only one player can play the game at a time.",
-	"authors": [
-		"LCLP"
-	],
-	"contact": {
-		"homepage": "https://github.com/LCLPYT/player-switch",
-		"sources": "https://github.com/LCLPYT/player-switch"
-	},
-	"license": "MIT",
-	"icon": "assets/player-switch/icon.png",
-	"environment": "*",
-	"entrypoints": {
-		"server": ["work.lclpnet.playerswitch.PlayerSwitchInit"]
-	},
-	"mixins": [
-		"player-switch.mixins.json"
-	],
-	"depends": {
-		"fabricloader": ">=0.16.14",
-		"minecraft": "~1.21.8",
-		"java": ">=21",
-		"fabric-api": "*"
-	},
-	"suggests": {}
+  "schemaVersion": 1,
+  "id": "player-switch",
+  "version": "${version}",
+  "name": "Player Switch",
+  "description": "Switches the active player after set time intervals. Only one player can play the game at a time.",
+  "authors": [
+    "LCLP"
+  ],
+  "contact": {
+    "homepage": "https://github.com/LCLPYT/player-switch",
+    "sources": "https://github.com/LCLPYT/player-switch"
+  },
+  "license": "MIT",
+  "icon": "assets/player-switch/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "server": ["work.lclpnet.playerswitch.PlayerSwitchInit"]
+  },
+  "mixins": [
+    "player-switch.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.14",
+    "minecraft": "~1.21.8",
+    "java": ">=21",
+    "fabric-api": "*",
+    "kibu": ">=0.146.0"
+  },
+  "suggests": {}
 }
