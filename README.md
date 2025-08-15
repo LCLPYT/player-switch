@@ -36,4 +36,34 @@ fixedUsername = "Player"
 
 #This UUID will be assigned to every player, so that everyone has the same player and world data
 fixedUuid = "a139e840-ff37-4cc7-a322-896af1a975f9"
+
+#Message of the day options
+[motd]
+    #Whether to set the message of the day (MOTD) according to the player whose turn it is.
+    enabled = true
+
+    #The language to use for the message of the day
+    language = "en_us"
+
+#A Discord Webhook can be configured so that notifications about new turns are sent to a Discord channel. 
+#Participants that have a Discord user ID defined will also be pinged when it's their turn.
+[discordWebhook]
+    #The Discord Webhook url. Can be retrieved by creating a Webhook in the "Integration" tab of the server settings.
+    url = ""
+
+    #The language to use for Discord messages
+    messageLanguage = "en_us"
+```
+
+## Troubleshooting
+### The server fails to start with player-switch installed.
+Make sure to configure at least one participant. 
+The server will only allow the configured participants to join.
+When you are adding the participants definitions, make sure to delete the pre-generated participant definition:
+
+```diff
+-#A list of participating players.
+-participants = []
++[[participants]]
++name = "Notch"
 ```

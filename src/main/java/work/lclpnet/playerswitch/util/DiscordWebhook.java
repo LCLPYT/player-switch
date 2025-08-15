@@ -116,6 +116,7 @@ public class DiscordWebhook {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(uri))
                 .POST(HttpRequest.BodyPublishers.ofString(content))
+                .header("Content-Type", "application/json")
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());

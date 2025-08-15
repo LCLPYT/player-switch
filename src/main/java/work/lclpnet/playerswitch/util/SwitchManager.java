@@ -47,7 +47,8 @@ public class SwitchManager {
 
     private int motdUpdateTimer = 0;
 
-    public SwitchManager(ConfigManager<Config> configManager, PlayerUtil playerUtil, Translations translations, MinecraftServer server, Logger logger) {
+    public SwitchManager(ConfigManager<Config> configManager, PlayerUtil playerUtil, Translations translations,
+                         MinecraftServer server, DiscordWebhook discordWebhook, Logger logger) {
         this.configManager = configManager;
         this.config = configManager.config();
         this.playerUtil = playerUtil;

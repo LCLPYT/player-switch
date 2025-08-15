@@ -15,6 +15,6 @@
   "player-switch.motd.time_left": "%s übrig",
   "player-switch.motd.waiting": "Warten auf %s ...",
   "player-switch.discord.your_turn_mention": "<@%s> Du bist jetzt an der Reihe!",
-  "player-switch.discord.your_turn": "%s ist nun an der Reihe.",
+  "player-switch.discord.your_turn": "**%s** ist nun an der Reihe.",
   "player-switch.discord.next_turn": "Der nächste Spieler ist nun an der Reihe"
 }
