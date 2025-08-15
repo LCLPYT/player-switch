@@ -1,6 +1,7 @@
 package work.lclpnet.playerswitch.util;
 
 import com.mojang.authlib.GameProfile;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.server.MinecraftServer;
@@ -11,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.config.ConfigManager;
 import work.lclpnet.kibu.hook.HookRegistrar;
+import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
 import work.lclpnet.kibu.scheduler.api.TaskScheduler;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.playerswitch.PlayerSwitchInit;
@@ -62,7 +64,9 @@ public class SwitchManager {
 
         hooks.registerHook(PlayerCanJoinCallback.HOOK, this::checkCanJoin);
         hooks.registerHook(ServerTickPauseCallback.HOOK, this::shouldPause);
-        hooks.registerHook(ServerPausedCallback.HOOK, server -> configManager.save());
+        hooks.registerHook(ServerPausedCallback.HOOK, this::onServerPaused);
+        hooks.registerHook(PlayerConnectionHooks.QUIT, this::onPlayerDisconnect);
+        ServerLifecycleEvents.BEFORE_SAVE.register(this::onBeforeSave);
 
         scheduler.interval(this::tick, 1);
 
@@ -151,13 +155,15 @@ public class SwitchManager {
         if (config.getMotd().isEnabled()) {
             updateMotd();
         }
+
+        configManager.save();
     }
 
     private void updateMotd() {
         preloadUsername().ifPresentOrElse(
                 future -> future.thenAccept(opt -> opt.ifPresentOrElse(
-                        motd::currentlyPlaying,
-                        () -> motd.currentlyPlaying("?")
+                        this::updateMotd,
+                        () -> updateMotd("?")
                 )).exceptionally(t -> {
                     logger.error("Failed to preload username", t);
                     motd.setMotd(motd.firstLine());
@@ -165,6 +171,14 @@ public class SwitchManager {
                 }),
                 motd::noParticipants
         );
+    }
+
+    private void updateMotd(String username) {
+        if (PlayerLookup.all(server).isEmpty()) {
+            motd.currentlyWaiting(username);
+        } else {
+            motd.currentlyPlaying(username);
+        }
     }
 
     private void switchPlayer() {
@@ -181,8 +195,6 @@ public class SwitchManager {
 
         prevPlayer.ifPresent(this::disconnectPlayer);
 
-        configManager.save();
-
         update();
     }
 
@@ -193,5 +205,17 @@ public class SwitchManager {
                 .orElseGet(() -> translations.translateText(player, "player-switch.time_expired").formatted(GRAY));
 
         player.networkHandler.disconnect(msg);
+    }
+
+    private void onPlayerDisconnect(ServerPlayerEntity player) {
+        update();
+    }
+
+    private void onServerPaused(MinecraftServer server) {
+        update();
+    }
+
+    private void onBeforeSave(MinecraftServer _server, boolean flush, boolean force) {
+        update();
     }
 }

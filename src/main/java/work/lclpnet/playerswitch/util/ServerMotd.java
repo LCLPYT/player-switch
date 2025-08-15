@@ -58,9 +58,11 @@ public class ServerMotd {
         ).formatted(AQUA));
 
         if (config.getParticipants().size() > 1) {
-            msg.append(" ").append(translations.translateText(
-                    language, "player-switch.motd.time_left", styled(turnTimeRemaining, YELLOW)
-            ).formatted(AQUA));
+            msg.append(Text.literal(" (").formatted(AQUA)
+                    .append(translations.translateText(
+                            language, "player-switch.motd.time_left", styled(turnTimeRemaining, YELLOW)
+                    ))
+                    .append(")"));
         }
 
         setMotd(msg);
@@ -71,7 +73,7 @@ public class ServerMotd {
 
         var msg = firstLine().append("\n").append(translations.translateText(
                 language, "player-switch.motd.waiting", styled(username, YELLOW)
-        ).formatted(RED, ITALIC));
+        ).formatted(GRAY, ITALIC));
 
         setMotd(msg);
     }
