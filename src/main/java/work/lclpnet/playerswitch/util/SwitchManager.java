@@ -48,7 +48,7 @@ public class SwitchManager {
 
     public boolean setup(TaskScheduler scheduler, HookRegistrar hooks) {
         if (config.getParticipants().isEmpty()) {
-            logger.error("No participants are configured. Please modify {}", PlayerSwitchInit.configPath());
+            logger.error("No participants are configured. Please modify {}. For more information, see https://github.com/LCLPYT/player-switch", PlayerSwitchInit.configPath());
             return false;
         }
 

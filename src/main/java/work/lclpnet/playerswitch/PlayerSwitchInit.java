@@ -14,6 +14,7 @@ import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.util.ModTranslations;
 import work.lclpnet.playerswitch.config.Config;
+import work.lclpnet.playerswitch.config.ConfigValidator;
 import work.lclpnet.playerswitch.util.MojangAPI;
 import work.lclpnet.playerswitch.util.PlayerUnifier;
 import work.lclpnet.playerswitch.util.PlayerUtil;
@@ -32,7 +33,11 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
 	@Override
 	public void onInitializeServer() {
-		var configManager = loadConfig();
+        var client = HttpClient.newHttpClient();
+        var api = new MojangAPI(client);
+
+		@SuppressWarnings("resource")
+        var configManager = loadConfig(api);
 
 		var scheduler = new Scheduler(LOGGER);
 		KibuScheduling.getRootScheduler().addChild(scheduler);
@@ -40,8 +45,6 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
 		var hooks = new HookContainer();
 
-		var client = HttpClient.newHttpClient();
-		var api = new MojangAPI(client);
 		var playerUtil = new PlayerUtil(api, LOGGER);
 
 		var unifier = new PlayerUnifier(configManager.config());
@@ -77,17 +80,22 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 		LOGGER.info("Initialized.");
 	}
 
-	private ConfigManager<Config> loadConfig() {
+	private ConfigManager<Config> loadConfig(MojangAPI api) {
 		Path configPath = configPath();
 
 		var configManager = new ConfigManager<>(configPath, new Config());
 
 		configManager.load();
 
+        var validator = new ConfigValidator(configManager, api, LOGGER);
+        validator.validate();
+
+        configManager.onChanged(validator::validate);
+
 		return configManager;
 	}
 
-	public static @NotNull Path configPath() {
+    public static @NotNull Path configPath() {
         return FabricLoader.getInstance().getConfigDir()
                 .resolve(MOD_ID)
                 .resolve("config.toml");

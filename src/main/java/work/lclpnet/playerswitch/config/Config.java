@@ -13,16 +13,16 @@ import java.util.UUID;
 @Setter
 public class Config {
 
-    @SerdeComment("The uuids of participating players, e.g. [\"00000000-0000-0000-0000-000000000000\"]")
-    private List<UUID> participants = List.of();
+    @SerdeComment("A list of participating players.")
+    private List<PlayerEntry> participants = List.of();
 
     @SerdeComment("The index of the current participating player")
     private int currentPlayer = 0;
 
-    @SerdeComment("The time the current player has player, in ticks")
+    @SerdeComment("The time the current player has already played, in ticks")
     private int elapsedTicks = 0;
 
-    @SerdeComment("The time after which to switch to the next player, in ticks")
+    @SerdeComment("The time after which to switch to the next player, in ticks (1 second = 20 ticks, 1 minute = 1200 ticks, 10 minutes = 12000 ticks ...)")
     private int switchDelayTicks = Ticks.minutes(10);
 
     @SerdeComment("This UUID will be assigned to every player, so that everyone has the same player and world data")
@@ -36,6 +36,6 @@ public class Config {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(participants.get(currentPlayer));
+        return Optional.ofNullable(participants.get(currentPlayer)).map(PlayerEntry::getUuid);
     }
 }
