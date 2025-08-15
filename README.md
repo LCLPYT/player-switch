@@ -4,11 +4,11 @@ Only one player can play the game at a time.
 
 ## Configuration
 > [!IMPORTANT]
-> If you start the server without configuring the participants, you'll get an error like: "No participants are configured. Please modify ./config/player-switch/config.toml first!
+> If you start the server without configuring the participants, you'll get an error like: "No participants are configured. Please modify ./config/player-switch/config.toml first!"
 > To fix this, you'll need to configure at least the participants in `config/player-switch/config.toml`
 
 ```toml
-#Define all players that should participate in this file.
+#Define all players that should participate in the challenge in this file.
 #Players will take turns in the order they occur in this file.
 #You can simply define a player by their Minecraft username.
 #Just add an entry like this for every player:
