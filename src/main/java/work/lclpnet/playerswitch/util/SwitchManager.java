@@ -41,6 +41,7 @@ public class SwitchManager {
     private final PlayerUtil playerUtil;
     private final Translations translations;
     private final MinecraftServer server;
+    private final DiscordWebhook discordWebhook;
     private final Logger logger;
     private final ServerMotd motd;
 
@@ -52,13 +53,14 @@ public class SwitchManager {
         this.playerUtil = playerUtil;
         this.translations = translations;
         this.server = server;
+        this.discordWebhook = discordWebhook;
         this.logger = logger;
         motd = new ServerMotd(server, translations, configManager);
     }
 
     public boolean setup(TaskScheduler scheduler, HookRegistrar hooks) {
         if (config.getParticipants().isEmpty()) {
-            logger.error("No participants are configured. Please modify {}", PlayerSwitchInit.configPath());
+            logger.error("No participants are configured. Please modify {}. For more information, see https://github.com/LCLPYT/player-switch", PlayerSwitchInit.configPath());
             return false;
         }
 
@@ -111,7 +113,7 @@ public class SwitchManager {
             return translations.translateText(language, "player-switch.other_online").formatted(YELLOW);
         }
 
-        if (!config.getParticipants().contains(gameProfile.getId())) {
+        if (config.getParticipants().stream().noneMatch(entry -> gameProfile.getId().equals(entry.getUuid()))) {
             return translations.translateText(language, "player-switch.not_participating").formatted(RED);
         }
 
@@ -194,6 +196,8 @@ public class SwitchManager {
         prevPlayer.ifPresent(this::disconnectPlayer);
 
         update();
+
+        discordWebhook.sendNotification();
     }
 
     private void disconnectPlayer(ServerPlayerEntity player) {

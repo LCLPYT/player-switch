@@ -13,5 +13,8 @@
   "player-switch.motd.subject": "Player-Switch challenge",
   "player-switch.motd.now_playing": "Now playing: %s",
   "player-switch.motd.time_left": "%s left",
-  "player-switch.motd.waiting": "Waiting for %s ..."
+  "player-switch.motd.waiting": "Waiting for %s ...",
+  "player-switch.discord.your_turn_mention": "<@%s> It's your turn now!",
+  "player-switch.discord.your_turn": "It's %s's turn now.",
+  "player-switch.discord.next_turn": "It's the next player's turn now."
 }

@@ -14,10 +14,8 @@ import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.util.ModTranslations;
 import work.lclpnet.playerswitch.config.Config;
-import work.lclpnet.playerswitch.util.MojangAPI;
-import work.lclpnet.playerswitch.util.PlayerUnifier;
-import work.lclpnet.playerswitch.util.PlayerUtil;
-import work.lclpnet.playerswitch.util.SwitchManager;
+import work.lclpnet.playerswitch.config.ConfigValidator;
+import work.lclpnet.playerswitch.util.*;
 
 import java.net.http.HttpClient;
 import java.nio.file.Path;
@@ -32,7 +30,10 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
 	@Override
 	public void onInitializeServer() {
-		var configManager = loadConfig();
+        var client = HttpClient.newHttpClient();
+        var api = new MojangAPI(client);
+
+        var configManager = loadConfig(api);
 
 		var scheduler = new Scheduler(LOGGER);
 		KibuScheduling.getRootScheduler().addChild(scheduler);
@@ -40,15 +41,15 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
 		var hooks = new HookContainer();
 
-		var client = HttpClient.newHttpClient();
-		var api = new MojangAPI(client);
 		var playerUtil = new PlayerUtil(api, LOGGER);
 
 		var unifier = new PlayerUnifier(configManager.config());
 		unifier.setup(hooks);
 
+        var discordWebhook = new DiscordWebhook(configManager, client, translations, playerUtil, LOGGER);
+
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-			var manager = new SwitchManager(configManager, playerUtil, translations, server, LOGGER);
+			var manager = new SwitchManager(configManager, playerUtil, translations, server, discordWebhook, LOGGER);
 
 			setupSuccess = manager.setup(scheduler, hooks);
 		});
@@ -56,7 +57,7 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
 			if (setupSuccess) return;
 
-			LOGGER.error("Shutting down server as player-switch is not configured");
+			LOGGER.error("Shutting down server as player-switch is not configured. For more information, see https://github.com/LCLPYT/player-switch");
 			server.stop(false);
 		});
 
@@ -77,17 +78,22 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 		LOGGER.info("Initialized.");
 	}
 
-	private ConfigManager<Config> loadConfig() {
+	private ConfigManager<Config> loadConfig(MojangAPI api) {
 		Path configPath = configPath();
 
 		var configManager = new ConfigManager<>(configPath, new Config());
 
 		configManager.load();
 
+        var validator = new ConfigValidator(configManager, api, LOGGER);
+        validator.validate();
+
+        configManager.onChanged(validator::validate);
+
 		return configManager;
 	}
 
-	public static @NotNull Path configPath() {
+    public static @NotNull Path configPath() {
         return FabricLoader.getInstance().getConfigDir()
                 .resolve(MOD_ID)
                 .resolve("config.toml");
