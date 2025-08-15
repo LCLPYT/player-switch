@@ -130,10 +130,8 @@ public class SwitchManager {
         }
 
         if (config.getParticipants().size() > 1) {
-            currentPlayer().ifPresent(player -> {
-                int secondsLeft = ticksLeft / 20;
-                TimeHelper.formatTime(translations, secondsLeft).formatted(AQUA).sendTo(player, true);
-            });
+            currentPlayer().ifPresent(player ->
+                    TimeHelper.formatTime(translations, ticksLeft).formatted(AQUA).sendTo(player, true));
         }
 
         config.setElapsedTicks(ticks + 1);
