@@ -82,3 +82,11 @@ When you are adding the participants definitions, make sure to delete the pre-ge
 +[[participants]]
 +name = "Notch"
 ```
+
+## Docker
+You can easily run a Minecraft server with player-switch installed using Docker.
+
+First, build the image:
+```
+docker build -f docker/Dockerfile -t player-switch .
+```

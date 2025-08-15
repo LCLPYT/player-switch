@@ -1,0 +1,13 @@
+name = "player-switch"
+author = "LCLP"
+version = "1.0.0"
+pack-format = "packwiz:1.1.0"
+
+[index]
+file = "index.toml"
+hash-format = "sha256"
+hash = "93c4a7b8f7fb8865c9eef55a4f7f7ec07c0d371bf68a929dab5ebf56cbebdaf5"
+
+[versions]
+fabric = "0.17.2"
+minecraft = "1.21.8"
