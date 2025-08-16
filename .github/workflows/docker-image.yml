@@ -9,6 +9,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Normalize repository name
+        run: |
+          echo "REPO_LC=${REPO,,}" >> $GITHUB_ENV
+        env:
+          REPO: '${{ github.repository }}'
+
       - name: Read Gradle versions
         id: get_version
         run: |
@@ -35,4 +41,4 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
+            ghcr.io/${{ REPO_LC }}:${{ steps.get_version.outputs.version }}
