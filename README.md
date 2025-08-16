@@ -52,6 +52,9 @@ fixedUsername = "Player"
 #This UUID will be assigned to every player, so that everyone has the same player and world data
 fixedUuid = "a139e840-ff37-4cc7-a322-896af1a975f9"
 
+#Whether to show a player limit of one player in the server list
+limitMaxPlayers = true
+
 #Message of the day options
 [motd]
     #Whether to set the message of the day (MOTD) according to the player whose turn it is.
