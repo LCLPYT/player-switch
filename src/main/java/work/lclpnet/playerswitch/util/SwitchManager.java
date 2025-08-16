@@ -19,6 +19,7 @@ import work.lclpnet.playerswitch.PlayerSwitchInit;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.config.PlayerEntry;
 import work.lclpnet.playerswitch.hook.PlayerCanJoinCallback;
+import work.lclpnet.playerswitch.hook.ServerMaxPlayersCallback;
 import work.lclpnet.playerswitch.hook.ServerPausedCallback;
 import work.lclpnet.playerswitch.hook.ServerTickPauseCallback;
 import work.lclpnet.playerswitch.mixin.ServerConfigurationNetworkHandlerAccessor;
@@ -69,6 +70,7 @@ public class SwitchManager {
         hooks.registerHook(ServerTickPauseCallback.HOOK, this::shouldPause);
         hooks.registerHook(ServerPausedCallback.HOOK, this::onServerPaused);
         hooks.registerHook(PlayerConnectionHooks.QUIT, this::onPlayerDisconnect);
+        hooks.registerHook(ServerMaxPlayersCallback.HOOK, this::modifyMaxPlayers);
         ServerLifecycleEvents.BEFORE_SAVE.register(this::onBeforeSave);
 
         scheduler.interval(this::tick, 1);
@@ -222,5 +224,9 @@ public class SwitchManager {
 
     private void onBeforeSave(MinecraftServer _server, boolean flush, boolean force) {
         update();
+    }
+
+    private int modifyMaxPlayers(int maxPlayers) {
+        return config.isLimitMaxPlayers() ? 1 : maxPlayers;
     }
 }

@@ -34,6 +34,9 @@ public class Config {
     @SerdeComment("Total challenge time, in ticks")
     private long totalTicks = 0;
 
+    @SerdeComment("Limit max players visually")
+    private boolean limitMaxPlayers = true;
+
     @SerdeComment("Message of the day options")
     private MotdConfig motd = new MotdConfig();
 

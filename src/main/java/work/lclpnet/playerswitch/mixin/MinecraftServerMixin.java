@@ -9,7 +9,9 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import work.lclpnet.playerswitch.PlayerSwitchInit;
+import work.lclpnet.playerswitch.hook.ServerMaxPlayersCallback;
 import work.lclpnet.playerswitch.hook.ServerPausedCallback;
 import work.lclpnet.playerswitch.hook.ServerTickPauseCallback;
 import work.lclpnet.playerswitch.type.PlayerSwitchMinecraftServer;
@@ -61,5 +63,19 @@ public abstract class MinecraftServerMixin implements PlayerSwitchMinecraftServe
     @Override
     public void playerSwitch$updateMetadata() {
         metadata = createMetadata();
+    }
+
+    @Inject(
+            method = "getMaxPlayerCount",
+            at = @At("RETURN"),
+            cancellable = true
+    )
+    public void modifyMaxPlayerCount(CallbackInfoReturnable<Integer> cir) {
+        int maxPlayers = cir.getReturnValueI();
+        int modified = ServerMaxPlayersCallback.HOOK.invoker().modifyMaxPlayers(maxPlayers);
+
+        if (maxPlayers != modified) {
+            cir.setReturnValue(modified);
+        }
     }
 }
