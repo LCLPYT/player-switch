@@ -1,6 +1,6 @@
 FROM eclipse-temurin:21-jdk-alpine AS builder
 
-RUN apk add --update curl go && \
+RUN apk add --no-cache --update curl go && \
     go install github.com/packwiz/packwiz@latest
 
 WORKDIR /deps
@@ -40,19 +40,31 @@ RUN ./gradlew build --no-daemon \
 
 # separate stage for runtime image
 FROM eclipse-temurin:21-jre-alpine
-WORKDIR /app
+
+RUN apk add --no-cache su-exec bash rsync
+
+# user setup (1000:1000)
+RUN addgroup -g 1000 minecraft && \
+    adduser -Ss /bin/false -u 1000 -G minecraft -h /home/minecraft minecraft
+
+WORKDIR /template
 
 # copy project-specific files
-COPY docker/run.sh docker/reset.sh ./
+COPY docker/run-wrapper.sh docker/run.sh docker/reset.sh ./
 
 # copy server files, mod artifact and server icon
 COPY --from=builder /server .
 COPY --from=builder /project/build/libs/*.jar mods/
 COPY --from=builder /project/src/main/resources/assets/player-switch/icon_64px.png server-icon.png
 
-RUN chmod -R o+rwx /app
+VOLUME ["/data"]
+WORKDIR "/data"
 
 EXPOSE 25565/tcp
 
+STOPSIGNAL SIGTERM
+ENV UID=1000 GID=1000 LC_ALL=en_US.UTF-8
+
 # run run wrapper script by default
-CMD [ "./run.sh" ]
+ENTRYPOINT ["/template/run-wrapper.sh"]
+CMD ["/template/run.sh"]

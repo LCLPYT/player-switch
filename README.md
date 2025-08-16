@@ -132,8 +132,7 @@ docker build -f docker/Dockerfile -t player-switch .
 
 mkdir -p run/{config,world}
 docker run \
-    --mount type=bind,src="$(pwd)/run/config,dst=/app/config" \
-    --mount type=bind,src="$(pwd)/run/world,dst=/app/world" \
+    --mount type=bind,src="$(pwd)/run,dst=/data" \
     -u "$(id -u):$(id --rm -p 25565:25565 -d -e EULA=true --name=player-switch player-switch
 ```
 
