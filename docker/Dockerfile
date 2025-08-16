@@ -45,4 +45,5 @@ COPY --from=builder /project/build/libs/*.jar mods/
 
 VOLUME /app
 
+EXPOSE 25565/tcp
 CMD [ "./run.sh" ]

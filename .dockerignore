@@ -1,0 +1,6 @@
+docker/packwiz/*.mrpack
+run/
+logs/
+.idea/
+.gradle/
+build/

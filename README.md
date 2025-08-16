@@ -86,7 +86,37 @@ When you are adding the participants definitions, make sure to delete the pre-ge
 ## Docker
 You can easily run a Minecraft server with player-switch installed using Docker.
 
-First, build the image:
+### Building the image
 ```
 docker build -f docker/Dockerfile -t player-switch .
 ```
+
+### Starting a container
+```
+mkdir -p run/{config,world}
+docker run \
+    --mount type=volume,src=player-switch,dst=/app \
+    --mount type=bind,src="$(pwd)/run/config,dst=/app/config" \
+    --mount type=bind,src="$(pwd)/run/world,dst=/app/world" \
+    --rm -p 25565:25565 -d -e EULA=true --name=player-switch player-switch
+```
+Please notice that by passing `EULA=true`, you accept the [Minecraft EULA](https://aka.ms/MinecraftEULA).
+
+### Accessing the configuration
+You can access all configuration in the `run/config` directory on the host system.
+Specifically, you need to edit `run/config/player-switch/config.toml` initially to configure the participants etc.
+
+### Stopping the server
+```
+docker stop player-switch
+```
+
+### Resetting a run
+First, make sure to stop the server.
+
+Delete all files from the `run/world` directory:
+```
+rm -rf run/world/*
+```
+
+Set `elapsedTicks=0`, `totalTicks=0` and `currentPlayer=0` in `run/config/player-switch/config.toml`.
