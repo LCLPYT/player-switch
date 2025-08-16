@@ -89,14 +89,47 @@ When you are adding the participants definitions, make sure to delete the pre-ge
 ## Docker
 You can easily run a Minecraft server with player-switch installed using Docker.
 
+There are pre-built images available [in the GitHub container registry](https://github.com/LCLPYT/player-switch/pkgs/container/player-switch), 
+but you can also build the image from source.
+
+### Prebuilt images
+If you want to use the prebuild images, use the `ghcr.io/lclpyt/player-switch` image.
+You can simplify the process by creating a `docker-compose.yml` in a directory of your choice:
+
+```yaml
+services:
+  server:
+    image: ghcr.io/lclpyt/player-switch:0.1.0-1.21.8
+    ports:
+      - "25565:25565"
+    environment:
+      - EULA=true
+    user: 1000:1000
+    volumes:
+      - ./run/config:/app/config
+      - ./run/world:/app/world
+
+  reset:
+    image: ghcr.io/lclpyt/player-switch:0.1.0-1.21.8
+    command: ./reset.sh
+    user: 1000:1000
+    volumes:
+      - ./run/config:/app/config
+      - ./run/world:/app/world
+```
+
+You can then use the docker compose commands listed below.
+
 ### Starting a server
 ```
-docker compose up server --build -d
+docker compose up server -d
 ```
 Alternatively, you can use docker directly:
 
-```
+```bash
+# this will build from source, but you can also skip this step and use ghcr.io/lclpyt/player-switch:latest as image instead
 docker build -f docker/Dockerfile -t player-switch .
+
 mkdir -p run/{config,world}
 docker run \
     --mount type=bind,src="$(pwd)/run/config,dst=/app/config" \
