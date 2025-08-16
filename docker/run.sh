@@ -9,4 +9,7 @@ if [ "$EULA" = "true" ]; then
     echo "eula=true" > eula.txt
 fi
 
-java -jar fabric-server-launcher.jar --nogui
+: "${MAX_MEMORY:=2G}"
+
+echo "$MAX_MEMORY"
+java "-Xmx$MAX_MEMORY" -jar fabric-server-launcher.jar --nogui

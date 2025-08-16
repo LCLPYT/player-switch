@@ -99,23 +99,20 @@ You can simplify the process by creating a `docker-compose.yml` in a directory o
 ```yaml
 services:
   server:
-    image: ghcr.io/lclpyt/player-switch:0.1.0-1.21.8
+    image: ghcr.io/lclpyt/player-switch:1.21.8-latest
     ports:
       - "25565:25565"
     environment:
-      - EULA=true
-    user: 1000:1000
+      EULA: true
+      MAX_MEMORY: 2G
     volumes:
-      - ./run/config:/app/config
-      - ./run/world:/app/world
+      - ./run:/data
 
   reset:
-    image: ghcr.io/lclpyt/player-switch:0.1.0-1.21.8
+    image: ghcr.io/lclpyt/player-switch:1.21.8-latest
     command: ./reset.sh
-    user: 1000:1000
     volumes:
-      - ./run/config:/app/config
-      - ./run/world:/app/world
+      - ./run:/data
 ```
 
 You can then use the docker compose commands listed below.
@@ -133,7 +130,7 @@ docker build -f docker/Dockerfile -t player-switch .
 mkdir -p run/{config,world}
 docker run \
     --mount type=bind,src="$(pwd)/run,dst=/data" \
-    -u "$(id -u):$(id --rm -p 25565:25565 -d -e EULA=true --name=player-switch player-switch
+    --rm -p 25565:25565 -d -e EULA=true --name=player-switch player-switch
 ```
 
 Please notice that by passing `EULA=true`, or starting via docker compose, you accept the [Minecraft EULA](https://aka.ms/MinecraftEULA).
@@ -164,5 +161,5 @@ docker container stop player-switch 2>/dev/null
 docker run \
     --mount type=bind,src="$(pwd)/run/config,dst=/app/config" \
     --mount type=bind,src="$(pwd)/run/world,dst=/app/world" \
-    -u "$(id -u):$(id -g)" --rm player-switch ./reset.sh
+    --rm player-switch ./reset.sh
 ```
