@@ -52,9 +52,6 @@ COPY --from=builder /project/src/main/resources/assets/player-switch/icon_64px.p
 
 RUN chmod -R o+rwx /app
 
-# /app directory will be copied to a volume for persistence
-VOLUME /app
-
 EXPOSE 25565/tcp
 
 # run run wrapper script by default

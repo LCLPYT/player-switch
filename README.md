@@ -86,21 +86,22 @@ When you are adding the participants definitions, make sure to delete the pre-ge
 ## Docker
 You can easily run a Minecraft server with player-switch installed using Docker.
 
-### Building the image
+### Starting a server
+```
+docker compose up server --build -d
+```
+Alternatively, you can use docker directly:
+
 ```
 docker build -f docker/Dockerfile -t player-switch .
-```
-
-### Starting a container
-```
 mkdir -p run/{config,world}
 docker run \
-    --mount type=volume,src=player-switch,dst=/app \
     --mount type=bind,src="$(pwd)/run/config,dst=/app/config" \
     --mount type=bind,src="$(pwd)/run/world,dst=/app/world" \
-    -u "$(id -u):$(id -g)" --rm -p 25565:25565 -d -e EULA=true --name=player-switch player-switch
+    -u "$(id -u):$(id --rm -p 25565:25565 -d -e EULA=true --name=player-switch player-switch
 ```
-Please notice that by passing `EULA=true`, you accept the [Minecraft EULA](https://aka.ms/MinecraftEULA).
+
+Please notice that by passing `EULA=true`, or starting via docker compose, you accept the [Minecraft EULA](https://aka.ms/MinecraftEULA).
 
 ### Accessing the configuration
 You can access all configuration in the `run/config` directory on the host system.
@@ -108,16 +109,20 @@ Specifically, you need to edit `run/config/player-switch/config.toml` initially 
 
 ### Stopping the server
 ```
+docker compose down
+```
+
+Or if you invoked docker directly:
+```
 docker stop player-switch
 ```
 
-### Updating the image
-Upon updating the image, you might want to remove the associated volume to use the latest files:
+### Resetting a run
 ```
-docker volume rm player-switch
+docker compose down server && docker compose up reset
 ```
 
-### Resetting a run
+Or alternatively via docker directly:
 ```
 mkdir -p run/{config,world}
 docker container stop player-switch 2>/dev/null

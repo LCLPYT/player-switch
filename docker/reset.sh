@@ -9,3 +9,5 @@ sed -i.bak \
   -e 's/^currentPlayer = .*/currentPlayer = 0/' \
   -e 's/^totalTicks = .*/totalTicks = 0/' \
   config/player-switch/config.toml
+
+echo "Run was reset"
