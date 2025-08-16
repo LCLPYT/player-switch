@@ -1,6 +1,11 @@
 hash-format = "sha256"
 
 [[files]]
+file = "mods/anti-xray.pw.toml"
+hash = "54094fe0d14e59b037f1efda0200ab9723b86eb51fb644d726f28b97261a72f8"
+metafile = true
+
+[[files]]
 file = "mods/fabric-api.pw.toml"
 hash = "59acfaf613f3df57ed4934a25e991e7f74751c19494be2e53d5eb86f6c659ced"
 metafile = true
@@ -8,4 +13,14 @@ metafile = true
 [[files]]
 file = "mods/kibu.pw.toml"
 hash = "b2da17579c8220084add82a39a9bfc01377640da6f1d2dda3af043f089303777"
+metafile = true
+
+[[files]]
+file = "mods/krypton.pw.toml"
+hash = "e26dacab5ed497b7bf6500e389eba5e21cd4b9d7b38089045cd26818a4d2f589"
+metafile = true
+
+[[files]]
+file = "mods/lithium.pw.toml"
+hash = "e10c94949bb58b8cfa9993a9f60c9283d5858d4d55fc450dbff2953644f45047"
 metafile = true
