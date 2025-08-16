@@ -98,7 +98,7 @@ docker run \
     --mount type=volume,src=player-switch,dst=/app \
     --mount type=bind,src="$(pwd)/run/config,dst=/app/config" \
     --mount type=bind,src="$(pwd)/run/world,dst=/app/world" \
-    --rm -p 25565:25565 -d -e EULA=true --name=player-switch player-switch
+    -u "$(id -u):$(id -g)" --rm -p 25565:25565 -d -e EULA=true --name=player-switch player-switch
 ```
 Please notice that by passing `EULA=true`, you accept the [Minecraft EULA](https://aka.ms/MinecraftEULA).
 
@@ -111,12 +111,18 @@ Specifically, you need to edit `run/config/player-switch/config.toml` initially 
 docker stop player-switch
 ```
 
+### Updating the image
+Upon updating the image, you might want to remove the associated volume to use the latest files:
+```
+docker volume rm player-switch
+```
+
 ### Resetting a run
-First, make sure to stop the server.
-
-Delete all files from the `run/world` directory:
 ```
-rm -rf run/world/*
+mkdir -p run/{config,world}
+docker container stop player-switch 2>/dev/null
+docker run \
+    --mount type=bind,src="$(pwd)/run/config,dst=/app/config" \
+    --mount type=bind,src="$(pwd)/run/world,dst=/app/world" \
+    -u "$(id -u):$(id -g)" --rm player-switch ./reset.sh
 ```
-
-Set `elapsedTicks=0`, `totalTicks=0` and `currentPlayer=0` in `run/config/player-switch/config.toml`.
