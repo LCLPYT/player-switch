@@ -11,5 +11,4 @@ fi
 
 : "${MAX_MEMORY:=2G}"
 
-echo "$MAX_MEMORY"
 java "-Xmx$MAX_MEMORY" -jar fabric-server-launcher.jar --nogui
