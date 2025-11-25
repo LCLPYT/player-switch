@@ -1,6 +1,6 @@
 package work.lclpnet.playerswitch.mixin;
 
-import com.mojang.authlib.GameProfile;
+import net.minecraft.server.PlayerConfigEntry;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,10 +18,10 @@ public class ServerPlayerEntityMixin {
             method = "getPermissionLevel",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/MinecraftServer;getPermissionLevel(Lcom/mojang/authlib/GameProfile;)I"
+                    target = "Lnet/minecraft/server/MinecraftServer;getPermissionLevel(Lnet/minecraft/server/PlayerConfigEntry;)I"
             )
     )
-    public GameProfile useRealGameProfileForPermissions(GameProfile profile) {
-        return PlayerUnifier.getRealProfile(networkHandler);
+    public PlayerConfigEntry useRealGameProfileForPermissions(PlayerConfigEntry player) {
+        return new PlayerConfigEntry(PlayerUnifier.getRealProfile(networkHandler));
     }
 }

@@ -23,17 +23,17 @@ public class PlayerUnifier {
         hooks.registerHook(GameProfileModificationCallback.HOOK, profile -> {
             var unified = new GameProfile(config.getFixedUuid(), config.getFixedUsername());
 
-            ((PlayerSwitchGameProfile) unified).playerSwitch$setRealGameProfile(profile);
+            PlayerSwitchGameProfile.get(unified).playerSwitch$setRealGameProfile(profile);
 
             return unified;
         });
     }
 
     public static UUID getRealUuid(ServerPlayerEntity player) {
-        return getRealProfile(player.networkHandler).getId();
+        return getRealProfile(player.networkHandler).id();
     }
 
     public static GameProfile getRealProfile(ServerPlayNetworkHandler networkHandler) {
-        return ((GameProfileCapture) networkHandler).playerSwitch$getRealGameProfile();
+        return GameProfileCapture.get(networkHandler).playerSwitch$getRealGameProfile();
     }
 }

@@ -18,6 +18,18 @@ repositories {
     maven {
         url "https://repo.lclpnet.work/repository/internal"
     }
+
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 loom {
@@ -42,6 +54,7 @@ dependencies {
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "work.lclpnet.mods.kibu:kibu:${project.kibu_version}"
+    modImplementation("work.lclpnet.mods.gaco:gaco:${project.gaco_version}")
 
     include(implementation('com.electronwill.night-config:core:3.8.1'))
     include(implementation('com.electronwill.night-config:toml:3.8.1'))

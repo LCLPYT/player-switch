@@ -5,6 +5,8 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.PlayerConfigEntry;
+import net.minecraft.server.network.ServerCommonNetworkHandler;
 import net.minecraft.server.network.ServerConfigurationNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -18,15 +20,16 @@ import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.playerswitch.PlayerSwitchInit;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.config.PlayerEntry;
-import work.lclpnet.playerswitch.hook.PlayerCanJoinCallback;
-import work.lclpnet.playerswitch.hook.ServerMaxPlayersCallback;
-import work.lclpnet.playerswitch.hook.ServerPausedCallback;
-import work.lclpnet.playerswitch.hook.ServerTickPauseCallback;
+import work.lclpnet.playerswitch.hook.*;
+import work.lclpnet.playerswitch.mixin.ServerCommonNetworkHandlerAccessor;
 import work.lclpnet.playerswitch.mixin.ServerConfigurationNetworkHandlerAccessor;
-import work.lclpnet.playerswitch.type.PlayerSwitchGameProfile;
+import work.lclpnet.playerswitch.type.GameProfileCapture;
 
 import java.net.SocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.Math.max;
@@ -45,6 +48,7 @@ public class SwitchManager {
     private final DiscordWebhook discordWebhook;
     private final Logger logger;
     private final ServerMotd motd;
+    private final Map<UUID, ServerConfigurationNetworkHandler> handlers = new HashMap<>();
 
     private int motdUpdateTimer = 0;
 
@@ -66,11 +70,14 @@ public class SwitchManager {
             return false;
         }
 
+        hooks.registerHook(PlayerBeforeCheckCanJoinCallback.HOOK, this::beforeCheckCanJoin);
+        hooks.registerHook(PlayerHandlerDisconnectCallback.HOOK, this::onPlayerHandlerDisconnect);
         hooks.registerHook(PlayerCanJoinCallback.HOOK, this::checkCanJoin);
         hooks.registerHook(ServerTickPauseCallback.HOOK, this::shouldPause);
         hooks.registerHook(ServerPausedCallback.HOOK, this::onServerPaused);
         hooks.registerHook(PlayerConnectionHooks.QUIT, this::onPlayerDisconnect);
         hooks.registerHook(ServerMaxPlayersCallback.HOOK, this::modifyMaxPlayers);
+
         ServerLifecycleEvents.BEFORE_SAVE.register(this::onBeforeSave);
 
         scheduler.interval(this::tick, 1);
@@ -78,6 +85,22 @@ public class SwitchManager {
         update();
 
         return true;
+    }
+
+    private void onPlayerHandlerDisconnect(ServerCommonNetworkHandler handler) {
+        var profile = ((ServerCommonNetworkHandlerAccessor) handler).invokeGetProfile();
+
+        if (profile == null) return;
+
+        UUID id = profile.id();
+
+        if (id == null) return;
+
+        handlers.remove(id);
+    }
+
+    private void beforeCheckCanJoin(GameProfile profile, ServerConfigurationNetworkHandler handler) {
+        handlers.put(profile.id(), handler);
     }
 
     private boolean shouldPause(MinecraftServer s) {
@@ -94,10 +117,10 @@ public class SwitchManager {
         return config.getCurrentPlayerEntry().map(playerUtil::getUsername);
     }
 
-    private @Nullable Text checkCanJoin(SocketAddress socketAddress, GameProfile gameProfile) {
-        Object networkHandler = ((PlayerSwitchGameProfile) gameProfile).playerSwitch$getNetworkHandler();
+    private @Nullable Text checkCanJoin(SocketAddress socketAddress, PlayerConfigEntry playerEntry) {
+        var handler = handlers.get(playerEntry.id());
 
-        if (!(networkHandler instanceof ServerConfigurationNetworkHandler handler)) return null;
+        if (handler == null) return null;
 
         SyncedClientOptions syncedOptions = ((ServerConfigurationNetworkHandlerAccessor) handler).getSyncedOptions();
         String language = syncedOptions != null ? syncedOptions.language() : "en_us";
@@ -108,7 +131,7 @@ public class SwitchManager {
             return translations.translateText(language, "player-switch.not_configured").formatted(RED);
         }
 
-        if (entry.getUuid().equals(gameProfile.getId())) {
+        if (entry.getUuid().equals(playerEntry.id())) {
             if (PlayerLookup.all(server).isEmpty()) {
                 return null;
             }
@@ -116,7 +139,7 @@ public class SwitchManager {
             return translations.translateText(language, "player-switch.other_online").formatted(YELLOW);
         }
 
-        if (config.getParticipants().stream().noneMatch(pe -> gameProfile.getId().equals(pe.getUuid()))) {
+        if (config.getParticipants().stream().noneMatch(pe -> playerEntry.id().equals(pe.getUuid()))) {
             return translations.translateText(language, "player-switch.not_participating").formatted(RED);
         }
 
@@ -216,6 +239,12 @@ public class SwitchManager {
 
     private void onPlayerDisconnect(ServerPlayerEntity player) {
         update();
+
+        var realProfile = GameProfileCapture.get(player.networkHandler).playerSwitch$getRealGameProfile();
+
+        if (realProfile != null) {
+            handlers.remove(realProfile.id());
+        }
     }
 
     private void onServerPaused(MinecraftServer server) {

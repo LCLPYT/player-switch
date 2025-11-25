@@ -1,7 +1,7 @@
 package work.lclpnet.playerswitch.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.authlib.GameProfile;
+import net.minecraft.server.PlayerConfigEntry;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -23,10 +23,10 @@ public class PlayerManagerMixin {
             at = @At("RETURN"),
             cancellable = true
     )
-    public void checkCanJoin(SocketAddress address, GameProfile profile, CallbackInfoReturnable<Text> cir) {
+    public void checkCanJoin(SocketAddress address, PlayerConfigEntry configEntry, CallbackInfoReturnable<Text> cir) {
         if (cir.getReturnValue() != null) return;
 
-        Text msg = PlayerCanJoinCallback.HOOK.invoker().checkCanJoin(address, profile);
+        Text msg = PlayerCanJoinCallback.HOOK.invoker().checkCanJoin(address, configEntry);
 
         cir.setReturnValue(msg);
     }
@@ -35,10 +35,10 @@ public class PlayerManagerMixin {
             method = "sendCommandTree(Lnet/minecraft/server/network/ServerPlayerEntity;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/MinecraftServer;getPermissionLevel(Lcom/mojang/authlib/GameProfile;)I"
+                    target = "Lnet/minecraft/server/MinecraftServer;getPermissionLevel(Lnet/minecraft/server/PlayerConfigEntry;)I"
             )
     )
-    public GameProfile useRealGameProfileForPermissions(GameProfile profile, @Local(argsOnly = true) ServerPlayerEntity player) {
-        return PlayerUnifier.getRealProfile(player.networkHandler);
+    public PlayerConfigEntry useRealGameProfileForPermissions(PlayerConfigEntry playerEntry, @Local(argsOnly = true) ServerPlayerEntity player) {
+        return new PlayerConfigEntry(PlayerUnifier.getRealProfile(player.networkHandler));
     }
 }

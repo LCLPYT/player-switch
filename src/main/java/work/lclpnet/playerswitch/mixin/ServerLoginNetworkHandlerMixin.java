@@ -15,10 +15,10 @@ public class ServerLoginNetworkHandlerMixin {
             method = "tickVerify",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/PlayerManager;checkCanJoin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/text/Text;"
+                    target = "Lnet/minecraft/server/PlayerManager;checkCanJoin(Ljava/net/SocketAddress;Lnet/minecraft/server/PlayerConfigEntry;)Lnet/minecraft/text/Text;"
             )
     )
     public void beforeCheckCanJoin(GameProfile profile, CallbackInfo ci) {
-        ((PlayerSwitchGameProfile) profile).playerSwitch$setNetworkHandler(this);
+        PlayerSwitchGameProfile.get(profile).playerSwitch$setNetworkHandler(this);
     }
 }

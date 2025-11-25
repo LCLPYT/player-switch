@@ -4,8 +4,12 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "GameProfileMixin",
+    "MinecraftDedicatedServerMixin",
     "MinecraftServerMixin",
     "PlayerManagerMixin",
+    "PrepareSpawnTaskMixin",
+    "ServerCommonNetworkHandlerAccessor",
+    "ServerCommonNetworkHandlerMixin",
     "ServerConfigurationNetworkHandlerAccessor",
     "ServerConfigurationNetworkHandlerMixin",
     "ServerLoginNetworkHandlerMixin",

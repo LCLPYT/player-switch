@@ -44,7 +44,7 @@ public abstract class ServerPlayNetworkHandlerMixin implements GameProfileCaptur
             )
     )
     public void setOriginalGameProfile(MinecraftServer server, ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo ci) {
-        realGameProfile = ((PlayerSwitchGameProfile) player.getGameProfile()).playerSwitch$getRealGameProfile();
+        realGameProfile = PlayerSwitchGameProfile.get(player.getGameProfile()).playerSwitch$getRealGameProfile();
     }
 
     @ModifyArg(
@@ -66,7 +66,7 @@ public abstract class ServerPlayNetworkHandlerMixin implements GameProfileCaptur
             )
     )
     public UUID useRealUuidForSigning(UUID sender) {
-        return realGameProfile.getId();
+        return realGameProfile.id();
     }
 
     @ModifyArg(
@@ -77,7 +77,7 @@ public abstract class ServerPlayNetworkHandlerMixin implements GameProfileCaptur
             )
     )
     public UUID useRealUuidForUnpacker(UUID sender) {
-        return realGameProfile.getId();
+        return realGameProfile.id();
     }
 
     @Inject(

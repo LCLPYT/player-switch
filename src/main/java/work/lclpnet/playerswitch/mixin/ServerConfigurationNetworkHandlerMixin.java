@@ -8,10 +8,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import work.lclpnet.playerswitch.hook.GameProfileModificationCallback;
-import work.lclpnet.playerswitch.type.PlayerSwitchGameProfile;
+import work.lclpnet.playerswitch.hook.PlayerBeforeCheckCanJoinCallback;
 
 @Mixin(ServerConfigurationNetworkHandler.class)
 public class ServerConfigurationNetworkHandlerMixin {
@@ -22,21 +20,11 @@ public class ServerConfigurationNetworkHandlerMixin {
             method = "onReady",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/PlayerManager;checkCanJoin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/text/Text;"
+                    target = "Lnet/minecraft/server/PlayerManager;checkCanJoin(Ljava/net/SocketAddress;Lnet/minecraft/server/PlayerConfigEntry;)Lnet/minecraft/text/Text;"
             )
     )
     public void beforeCheckCanJoin(ReadyC2SPacket packet, CallbackInfo ci) {
-        ((PlayerSwitchGameProfile) profile).playerSwitch$setNetworkHandler(this);
-    }
-
-    @ModifyArg(
-            method = "onReady",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/server/network/ServerPlayerEntity;<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/server/world/ServerWorld;Lcom/mojang/authlib/GameProfile;Lnet/minecraft/network/packet/c2s/common/SyncedClientOptions;)V"
-            )
-    )
-    public GameProfile unifyGameProfile(GameProfile gameProfile) {
-        return GameProfileModificationCallback.HOOK.invoker().modifyGameProfile(gameProfile);
+        ServerConfigurationNetworkHandler self = (ServerConfigurationNetworkHandler) (Object) this;
+        PlayerBeforeCheckCanJoinCallback.HOOK.invoker().beforeCheckCanJoin(profile, self);
     }
 }

@@ -11,4 +11,8 @@ public interface PlayerSwitchGameProfile extends GameProfileCapture {
     Object playerSwitch$getNetworkHandler();
 
     void playerSwitch$setRealGameProfile(GameProfile real);
+
+    static PlayerSwitchGameProfile get(GameProfile profile) {
+        return (PlayerSwitchGameProfile) (Object) profile;
+    }
 }
