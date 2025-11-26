@@ -27,6 +27,7 @@ import work.lclpnet.playerswitch.type.GameProfileCapture;
 import work.lclpnet.playerswitch.util.queue.PlayerQueue;
 
 import java.net.SocketAddress;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -51,6 +52,7 @@ public class SwitchManager {
     private final ServerMotd motd;
     private final Map<UUID, ServerConfigurationNetworkHandler> handlers = new HashMap<>();
     private final PlayerQueue queue;
+    private final TurnTimeout turnTimeout;
 
     private int motdUpdateTimer = 0;
 
@@ -64,7 +66,9 @@ public class SwitchManager {
         this.discordWebhook = discordWebhook;
         this.logger = logger;
         this.queue = queue;
+
         motd = new ServerMotd(server, translations, configManager);
+        turnTimeout = new TurnTimeout(configManager, this::switchPlayer);
     }
 
     public boolean setup(TaskScheduler scheduler, HookRegistrar hooks) {
@@ -107,7 +111,13 @@ public class SwitchManager {
     }
 
     private boolean shouldPause(MinecraftServer s) {
-        return PlayerLookup.all(s).isEmpty() || PlayerLookup.all(s).stream().noneMatch(this::isCurrentPlayer);
+        boolean shouldPause = PlayerLookup.all(s).isEmpty() || PlayerLookup.all(s).stream().noneMatch(this::isCurrentPlayer);
+
+        if (shouldPause) {
+            turnTimeout.tick();
+        }
+
+        return shouldPause;
     }
 
     public boolean isCurrentPlayer(ServerPlayerEntity player) {
@@ -213,6 +223,12 @@ public class SwitchManager {
     }
 
     private void switchPlayer() {
+        config.setLastSwitchTime(Instant.now().getEpochSecond());
+        doSwitchPlayer();
+        update();
+    }
+
+    private void doSwitchPlayer() {
         int currentPlayer = config.getCurrentPlayer();
 
         PlayerEntry current = config.getParticipants().get(currentPlayer);
@@ -225,7 +241,8 @@ public class SwitchManager {
         int nextPlayer = config.participantIndex(next);
 
         if (nextPlayer == -1) {
-            throw new IllegalStateException("Unknown next participant entry: " + nextPlayer);
+            logger.error("Unknown next participant entry: {}", nextPlayer);
+            return;
         }
 
         var prevPlayer = currentPlayer();
@@ -234,8 +251,6 @@ public class SwitchManager {
         config.setCurrentPlayer(nextPlayer);
 
         prevPlayer.ifPresent(this::disconnectPlayer);
-
-        update();
 
         discordWebhook.sendNotification();
     }
