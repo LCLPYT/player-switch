@@ -24,6 +24,7 @@ import work.lclpnet.playerswitch.hook.*;
 import work.lclpnet.playerswitch.mixin.ServerCommonNetworkHandlerAccessor;
 import work.lclpnet.playerswitch.mixin.ServerConfigurationNetworkHandlerAccessor;
 import work.lclpnet.playerswitch.type.GameProfileCapture;
+import work.lclpnet.playerswitch.util.queue.PlayerQueue;
 
 import java.net.SocketAddress;
 import java.util.HashMap;
@@ -49,11 +50,12 @@ public class SwitchManager {
     private final Logger logger;
     private final ServerMotd motd;
     private final Map<UUID, ServerConfigurationNetworkHandler> handlers = new HashMap<>();
+    private final PlayerQueue queue;
 
     private int motdUpdateTimer = 0;
 
     public SwitchManager(ConfigManager<Config> configManager, PlayerUtil playerUtil, Translations translations,
-                         MinecraftServer server, DiscordWebhook discordWebhook, Logger logger) {
+                         MinecraftServer server, DiscordWebhook discordWebhook, Logger logger, PlayerQueue queue) {
         this.configManager = configManager;
         this.config = configManager.config();
         this.playerUtil = playerUtil;
@@ -61,6 +63,7 @@ public class SwitchManager {
         this.server = server;
         this.discordWebhook = discordWebhook;
         this.logger = logger;
+        this.queue = queue;
         motd = new ServerMotd(server, translations, configManager);
     }
 
@@ -211,10 +214,19 @@ public class SwitchManager {
 
     private void switchPlayer() {
         int currentPlayer = config.getCurrentPlayer();
-        int count = config.getParticipants().size();
-        int nextPlayer = (currentPlayer + 1) % count;
 
-        if (nextPlayer == currentPlayer) return;
+        PlayerEntry current = config.getParticipants().get(currentPlayer);
+        PlayerEntry next = queue.next();
+
+        saveQueueAsync();
+
+        if (current == next) return;
+
+        int nextPlayer = config.participantIndex(next);
+
+        if (nextPlayer == -1) {
+            throw new IllegalStateException("Unknown next participant entry: " + nextPlayer);
+        }
 
         var prevPlayer = currentPlayer();
 
@@ -226,6 +238,10 @@ public class SwitchManager {
         update();
 
         discordWebhook.sendNotification();
+    }
+
+    private void saveQueueAsync() {
+        CompletableFuture.runAsync(() -> queue.save(PlayerSwitchInit.getQueuePath()));
     }
 
     private void disconnectPlayer(ServerPlayerEntity player) {
