@@ -43,6 +43,9 @@ public class Config {
     @SerdeComment("A Discord Webhook can be configured so that notifications about new turns are sent to a Discord channel. Participants that have a Discord user ID defined will be pinged when it's their turn.")
     private final DiscordWebhookConfig discordWebhook = new DiscordWebhookConfig();
 
+    @SerdeComment("Player ordering type to use")
+    private final QueueType queueType = QueueType.BALANCED_RANDOM;
+
     public Optional<PlayerEntry> getCurrentPlayerEntry() {
         if (participants.isEmpty()) {
             return Optional.empty();
@@ -53,5 +56,19 @@ public class Config {
 
     public Optional<UUID> getCurrentPlayerUuid() {
         return getCurrentPlayerEntry().map(PlayerEntry::getUuid);
+    }
+
+    public int participantIndex(PlayerEntry entry) {
+        int i = 0;
+
+        for (PlayerEntry participant : participants) {
+            if (entry.equals(participant)) {
+                return i;
+            }
+
+            i++;
+        }
+
+        return -1;
     }
 }

@@ -16,6 +16,9 @@ import work.lclpnet.kibu.translate.util.ModTranslations;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.config.ConfigValidator;
 import work.lclpnet.playerswitch.util.*;
+import work.lclpnet.playerswitch.util.queue.PlayerQueue;
+import work.lclpnet.playerswitch.util.queue.RepeatingPlayerQueue;
+import work.lclpnet.playerswitch.util.queue.SeamlessPlayerQueue;
 
 import java.net.http.HttpClient;
 import java.nio.file.Path;
@@ -46,8 +49,10 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
         var discordWebhook = new DiscordWebhook(configManager, client, translations, playerUtil, LOGGER);
 
+        var queue = loadQueue(configManager);
+
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            var manager = new SwitchManager(configManager, playerUtil, translations, server, discordWebhook, LOGGER);
+            var manager = new SwitchManager(configManager, playerUtil, translations, server, discordWebhook, LOGGER, queue);
 
             boolean setupSuccess = manager.setup(scheduler, hooks);
 
@@ -65,16 +70,32 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 			configManager.save();
 			configManager.close();
 			client.close();
+
+            queue.save(getQueuePath());
 		};
 
-		ServerLifecycleEvents.SERVER_STOPPING.register(server -> shutdown.run());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> shutdown.run());
 
 		Runtime.getRuntime().addShutdownHook(new Thread(shutdown, "player-switch shutdown hook"));
 
 		LOGGER.info("Initialized.");
 	}
 
-	private ConfigManager<Config> loadConfig(MojangAPI api) {
+    private PlayerQueue loadQueue(ConfigManager<Config> configManager) {
+        var config = configManager.config();
+        var participants = config.getParticipants();
+
+        PlayerQueue queue = switch (config.getQueueType()) {
+            case REPEATING -> new RepeatingPlayerQueue(participants, LOGGER);
+            case BALANCED_RANDOM -> new SeamlessPlayerQueue(participants, LOGGER);
+        };
+
+        queue.restore(getQueuePath());
+
+        return queue;
+    }
+
+    private ConfigManager<Config> loadConfig(MojangAPI api) {
 		Path configPath = configPath();
 
 		var configManager = new ConfigManager<>(configPath, new Config());
@@ -94,6 +115,12 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
                 .resolve(MOD_ID)
                 .resolve("config.toml");
 	}
+
+    public static @NotNull Path getQueuePath() {
+        return FabricLoader.getInstance().getConfigDir()
+                .resolve(MOD_ID)
+                .resolve("queue.json");
+    }
 
 	private static Translations getTranslations() {
 		var result = ModTranslations.fromAssets(MOD_ID, LOGGER);
