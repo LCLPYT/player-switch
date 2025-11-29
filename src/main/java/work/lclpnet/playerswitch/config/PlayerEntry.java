@@ -5,6 +5,7 @@ import com.electronwill.nightconfig.core.serde.annotations.SerdeSkipSerializingI
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Getter @Setter
@@ -27,6 +28,18 @@ public class PlayerEntry {
     @SerdeSkipDeserializingIf(SerdeSkipDeserializingIf.SkipDeIf.IS_MISSING)
     @SerdeSkipSerializingIf(SerdeSkipSerializingIf.SkipSerIf.IS_NULL)
     private String displayName = "";
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        PlayerEntry entry = (PlayerEntry) o;
+        return Objects.equals(uuid, entry.uuid) && Objects.equals(name, entry.name) && Objects.equals(discordId, entry.discordId) && Objects.equals(displayName, entry.displayName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uuid, name, discordId, displayName);
+    }
 
     public static PlayerEntry of(String name) {
         var entry = new PlayerEntry();

@@ -70,7 +70,7 @@ public class Config {
         int i = 0;
 
         for (PlayerEntry participant : participants) {
-            if (entry == participant) {
+            if (entry.equals(participant)) {
                 return i;
             }
 

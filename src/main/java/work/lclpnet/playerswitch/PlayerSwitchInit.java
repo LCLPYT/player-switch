@@ -15,7 +15,6 @@ import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.util.ModTranslations;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.config.ConfigValidator;
-import work.lclpnet.playerswitch.config.PlayerEntry;
 import work.lclpnet.playerswitch.util.*;
 import work.lclpnet.playerswitch.util.queue.PlayerQueue;
 import work.lclpnet.playerswitch.util.queue.RepeatingPlayerQueue;
@@ -23,7 +22,6 @@ import work.lclpnet.playerswitch.util.queue.SeamlessPlayerQueue;
 
 import java.net.http.HttpClient;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PlayerSwitchInit implements DedicatedServerModInitializer {
@@ -76,7 +74,7 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
             queue.save(getQueuePath());
 		};
 
-		ServerLifecycleEvents.SERVER_STOPPING.register(server -> shutdown.run());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> shutdown.run());
 
 		Runtime.getRuntime().addShutdownHook(new Thread(shutdown, "player-switch shutdown hook"));
 
