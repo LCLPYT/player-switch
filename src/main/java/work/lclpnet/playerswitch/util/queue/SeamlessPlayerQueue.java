@@ -70,6 +70,12 @@ public class SeamlessPlayerQueue implements PlayerQueue {
 
     @Override
     public PlayerEntry next() {
-        return Objects.requireNonNull(queue, "Queue not initialized yet").next();
+        var queue = Objects.requireNonNull(this.queue, "Queue not initialized yet");
+
+        PlayerEntry entry = queue.next();
+
+        queue.pushElement(entry);
+
+        return entry;
     }
 }
