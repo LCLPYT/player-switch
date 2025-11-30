@@ -8,6 +8,7 @@ import work.lclpnet.kibu.scheduler.Ticks;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Getter
 @Setter
@@ -45,6 +46,12 @@ public class Config {
 
     @SerdeComment("Player ordering type to use")
     private final QueueType queueType = QueueType.BALANCED_RANDOM;
+
+    @SerdeComment("Ticks since the last switch.")
+    private long ticksSinceLastSwitch = 0;
+
+    @SerdeComment("Turn timeout in seconds. If the current player does not play their turn within the timeout, the player will be skipped.")
+    private long turnTimeoutSeconds = TimeUnit.DAYS.toSeconds(3);
 
     public Optional<PlayerEntry> getCurrentPlayerEntry() {
         if (participants.isEmpty()) {
