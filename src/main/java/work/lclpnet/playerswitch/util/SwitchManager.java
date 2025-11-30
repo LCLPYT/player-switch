@@ -226,6 +226,8 @@ public class SwitchManager {
 
         var participants = config.getParticipants();
 
+        if (participants.size() < 2) return;
+
         if (currentPlayer >= 0 && currentPlayer < participants.size()) {
             PlayerEntry current = participants.get(currentPlayer);
 

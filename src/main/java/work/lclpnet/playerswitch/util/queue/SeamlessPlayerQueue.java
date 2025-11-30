@@ -18,6 +18,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.floor;
+import static java.lang.Math.max;
 
 public class SeamlessPlayerQueue implements PlayerQueue {
 
@@ -51,6 +52,10 @@ public class SeamlessPlayerQueue implements PlayerQueue {
     public void restore(Path path) {
         float marginPercent = 0.3f;
         int margin = (int) floor(marginPercent * playerEntries.size());
+
+        if (playerEntries.size() > 1) {
+            margin = max(margin, 1);
+        }
 
         var persistence = new JsonFileQueuePersistence<>(path, codec, logger);
         var transfer = persistence.restore();
