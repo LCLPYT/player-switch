@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import work.lclpnet.kibu.scheduler.Ticks;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,8 +47,8 @@ public class Config {
     @SerdeComment("Player ordering type to use")
     private final QueueType queueType = QueueType.BALANCED_RANDOM;
 
-    @SerdeComment("Timestamp of the lsat player switch. Unix time in seconds.")
-    private long lastSwitchTime = Instant.now().getEpochSecond();
+    @SerdeComment("Ticks since the last switch.")
+    private long ticksSinceLastSwitch = 0;
 
     @SerdeComment("Turn timeout in seconds. If the current player does not play their turn within the timeout, the player will be skipped.")
     private long turnTimeoutSeconds = TimeUnit.DAYS.toSeconds(3);

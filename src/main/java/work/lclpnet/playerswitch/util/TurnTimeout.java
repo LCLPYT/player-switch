@@ -3,7 +3,6 @@ package work.lclpnet.playerswitch.util;
 import work.lclpnet.kibu.config.ConfigManager;
 import work.lclpnet.playerswitch.config.Config;
 
-import java.time.Instant;
 import java.util.Calendar;
 
 public class TurnTimeout {
@@ -22,11 +21,11 @@ public class TurnTimeout {
         Calendar instance = Calendar.getInstance();
         instance.get(Calendar.SECOND);
 
-        Instant lastSwitch = Instant.ofEpochSecond(config.getLastSwitchTime());
-        Instant timeout = lastSwitch.plusSeconds(config.getTurnTimeoutSeconds())M
-        Instant now = Instant.now();
+        long ticksSinceLastSwitch = config.getTicksSinceLastSwitch() + 1;
 
-        if (now.isBefore(timeout)) return;
+        config.setTicksSinceLastSwitch(ticksSinceLastSwitch);
+
+        if (ticksSinceLastSwitch < config.getTurnTimeoutSeconds() * 20) return;
 
         switchAction.run();
     }

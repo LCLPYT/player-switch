@@ -27,7 +27,6 @@ import work.lclpnet.playerswitch.type.GameProfileCapture;
 import work.lclpnet.playerswitch.util.queue.PlayerQueue;
 
 import java.net.SocketAddress;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -68,7 +67,7 @@ public class SwitchManager {
         this.queue = queue;
 
         motd = new ServerMotd(server, translations, configManager);
-        turnTimeout = new TurnTimeout(configManager, this::switchPlayer);
+        turnTimeout = new TurnTimeout(configManager, this::skipPlayer);
     }
 
     public boolean setup(TaskScheduler scheduler, HookRegistrar hooks) {
@@ -222,8 +221,24 @@ public class SwitchManager {
         }
     }
 
+    private void skipPlayer() {
+        int currentPlayer = config.getCurrentPlayer();
+
+        var participants = config.getParticipants();
+
+        if (currentPlayer >= 0 && currentPlayer < participants.size()) {
+            PlayerEntry current = participants.get(currentPlayer);
+
+            logger.info("Skipping player {} as the configured turn timeout was reached", current.getName());
+        } else {
+            logger.info("Skipping current player as the configured turn timeout was reached");
+        }
+
+        switchPlayer();
+    }
+
     private void switchPlayer() {
-        config.setLastSwitchTime(Instant.now().getEpochSecond());
+        config.setTicksSinceLastSwitch(0);
         doSwitchPlayer();
         update();
     }
