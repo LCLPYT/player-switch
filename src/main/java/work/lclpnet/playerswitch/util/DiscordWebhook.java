@@ -38,6 +38,8 @@ public class DiscordWebhook {
         var config = configManager.config();
         var webhookConfig = config.getDiscordWebhook();
 
+        if (!webhookConfig.isEnabled()) return;
+
         String uri = webhookConfig.getUrl();
 
         if (uri.isBlank()) return;

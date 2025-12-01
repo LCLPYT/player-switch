@@ -23,7 +23,7 @@ public class Config {
     @SerdeComment("The time the current player has already played, in ticks")
     private int elapsedTicks = 0;
 
-    @SerdeComment("The time after which to switch to the next player, in ticks (1 second = 20 ticks, 1 minute = 1200 ticks, 10 minutes = 12000 ticks ...)")
+    @SerdeComment("The play time after which to switch to the next player, in ticks (1 second = 20 ticks, 1 minute = 1200 ticks, 10 minutes = 12000 ticks ...)")
     private int switchDelayTicks = Ticks.minutes(10);
 
     @SerdeComment("This UUID will be assigned to every player, so that everyone has the same player and world data")
