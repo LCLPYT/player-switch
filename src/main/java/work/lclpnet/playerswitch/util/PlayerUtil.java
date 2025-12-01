@@ -47,4 +47,11 @@ public class PlayerUtil {
 
         return getUsername(entry.getUuid());
     }
+
+    public CompletableFuture<String> getSafeUsername(PlayerEntry entry) {
+        return getUsername(entry).thenApply(opt -> opt.orElseGet(() -> {
+            String nameFromConfig = entry.getName();
+            return nameFromConfig.isBlank() ? "?" : nameFromConfig;
+        }));
+    }
 }

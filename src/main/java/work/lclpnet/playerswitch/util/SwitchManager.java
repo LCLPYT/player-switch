@@ -271,6 +271,14 @@ public class SwitchManager {
         prevPlayer.ifPresent(this::disconnectPlayer);
 
         messenger.sendTurnNotification(next);
+
+        logStatus(current, next);
+    }
+
+    private void logStatus(PlayerEntry current, PlayerEntry next) {
+        playerUtil.getSafeUsername(current).thenCompose(currentName ->
+                playerUtil.getSafeUsername(next).thenAccept(nextName ->
+                        logger.info("{}'s turn is over, switching to {}'s turn", currentName, nextName)));
     }
 
     private void saveQueueAsync() {

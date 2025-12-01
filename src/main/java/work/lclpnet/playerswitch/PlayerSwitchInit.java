@@ -62,7 +62,10 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
             boolean setupSuccess = manager.setup(scheduler, hooks);
 
-			if (setupSuccess) return;
+			if (setupSuccess) {
+                logStatus(configManager, playerUtil);
+                return;
+            }
 
 			LOGGER.error("Shutting down server as player-switch is not configured. For more information, see https://github.com/LCLPYT/player-switch");
 			server.stop(false);
@@ -88,6 +91,17 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
 		LOGGER.info("Initialized.");
 	}
+
+    private void logStatus(ConfigManager<Config> configManager, PlayerUtil playerUtil) {
+        var playerEntry = configManager.config().getCurrentPlayerEntry().orElse(null);
+
+        if (playerEntry == null) {
+            LOGGER.warn("It's no player's turn currently...");
+            return;
+        }
+
+        playerUtil.getSafeUsername(playerEntry).thenAccept(name -> LOGGER.info("Currently, it's {}'s turn", name));
+    }
 
     private PlayerQueue loadQueue(ConfigManager<Config> configManager) {
         var config = configManager.config();
