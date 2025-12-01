@@ -63,11 +63,15 @@ public class DiscordBot {
     public void sendDirectMessage(String userId, String message) {
         var jda = this.jda;
 
-        if (!ready || jda == null) return;
+        if (!ready || jda == null || userId.isBlank()) return;
 
-        jda.retrieveUserById(userId)
-                .queue(user -> user.openPrivateChannel()
-                        .queue(channel -> channel.sendMessage(message).queue()));
+        try {
+            jda.retrieveUserById(userId)
+                    .queue(user -> user.openPrivateChannel()
+                            .queue(channel -> channel.sendMessage(message).queue()));
+        } catch (Throwable t) {
+            logger.error("Failed to send discord direct message to user '{}'", userId, t);
+        }
     }
 
     public void sendTurnNotification(PlayerEntry playerEntry) {
