@@ -44,6 +44,9 @@ public class Config {
     @SerdeComment("A Discord Webhook can be configured so that notifications about new turns are sent to a Discord channel. Participants that have a Discord user ID defined will be pinged when it's their turn.")
     private final DiscordWebhookConfig discordWebhook = new DiscordWebhookConfig();
 
+    @SerdeComment("A Discord bot can be used to send players direct messages when it's their turn.")
+    private final DiscordBotConfig discordBot = new DiscordBotConfig();
+
     @SerdeComment("Player ordering type to use")
     private final QueueType queueType = QueueType.BALANCED_RANDOM;
 
