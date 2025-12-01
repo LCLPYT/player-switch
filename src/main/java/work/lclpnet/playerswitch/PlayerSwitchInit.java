@@ -16,6 +16,7 @@ import work.lclpnet.kibu.translate.util.ModTranslations;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.config.ConfigValidator;
 import work.lclpnet.playerswitch.util.*;
+import work.lclpnet.playerswitch.util.msg.Messenger;
 import work.lclpnet.playerswitch.util.queue.PlayerQueue;
 import work.lclpnet.playerswitch.util.queue.RepeatingPlayerQueue;
 import work.lclpnet.playerswitch.util.queue.SeamlessPlayerQueue;
@@ -48,11 +49,16 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 		unifier.setup(hooks);
 
         var discordWebhook = new DiscordWebhook(configManager, client, translations, playerUtil, LOGGER);
+        var discordBot = new DiscordBot(configManager, translations, LOGGER);
+
+        discordBot.setup().join();
+
+        var messenger = new Messenger(discordWebhook, discordBot);
 
         var queue = loadQueue(configManager);
 
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            var manager = new SwitchManager(configManager, playerUtil, translations, server, discordWebhook, LOGGER, queue);
+            var manager = new SwitchManager(configManager, playerUtil, translations, server, messenger, LOGGER, queue);
 
             boolean setupSuccess = manager.setup(scheduler, hooks);
 
@@ -72,6 +78,8 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 			client.close();
 
             queue.save(getQueuePath());
+
+            discordBot.shutdown();
 		};
 
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> shutdown.run());

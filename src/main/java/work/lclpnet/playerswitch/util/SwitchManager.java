@@ -24,6 +24,7 @@ import work.lclpnet.playerswitch.hook.*;
 import work.lclpnet.playerswitch.mixin.ServerCommonNetworkHandlerAccessor;
 import work.lclpnet.playerswitch.mixin.ServerConfigurationNetworkHandlerAccessor;
 import work.lclpnet.playerswitch.type.GameProfileCapture;
+import work.lclpnet.playerswitch.util.msg.Messenger;
 import work.lclpnet.playerswitch.util.queue.PlayerQueue;
 
 import java.net.SocketAddress;
@@ -46,7 +47,7 @@ public class SwitchManager {
     private final PlayerUtil playerUtil;
     private final Translations translations;
     private final MinecraftServer server;
-    private final DiscordWebhook discordWebhook;
+    private final Messenger messenger;
     private final Logger logger;
     private final ServerMotd motd;
     private final Map<UUID, ServerConfigurationNetworkHandler> handlers = new HashMap<>();
@@ -56,13 +57,13 @@ public class SwitchManager {
     private int motdUpdateTimer = 0;
 
     public SwitchManager(ConfigManager<Config> configManager, PlayerUtil playerUtil, Translations translations,
-                         MinecraftServer server, DiscordWebhook discordWebhook, Logger logger, PlayerQueue queue) {
+                         MinecraftServer server, Messenger messenger, Logger logger, PlayerQueue queue) {
         this.configManager = configManager;
         this.config = configManager.config();
         this.playerUtil = playerUtil;
         this.translations = translations;
         this.server = server;
-        this.discordWebhook = discordWebhook;
+        this.messenger = messenger;
         this.logger = logger;
         this.queue = queue;
 
@@ -269,7 +270,7 @@ public class SwitchManager {
 
         prevPlayer.ifPresent(this::disconnectPlayer);
 
-        discordWebhook.sendNotification();
+        messenger.sendTurnNotification(next);
     }
 
     private void saveQueueAsync() {

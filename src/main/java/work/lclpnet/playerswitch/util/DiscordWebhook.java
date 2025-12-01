@@ -34,7 +34,7 @@ public class DiscordWebhook {
         this.logger = logger;
     }
 
-    public void sendNotification() {
+    public void sendTurnNotification(PlayerEntry playerEntry) {
         var config = configManager.config();
         var webhookConfig = config.getDiscordWebhook();
 
@@ -43,10 +43,6 @@ public class DiscordWebhook {
         String uri = webhookConfig.getUrl();
 
         if (uri.isBlank()) return;
-
-        PlayerEntry playerEntry = config.getCurrentPlayerEntry().orElse(null);
-
-        if (playerEntry == null) return;
 
         String language = webhookConfig.getMessageLanguage();
         String discordUserId = playerEntry.getDiscordId();

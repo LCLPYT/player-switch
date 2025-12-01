@@ -29,16 +29,24 @@ public class PlayerEntry {
     @SerdeSkipSerializingIf(SerdeSkipSerializingIf.SkipSerIf.IS_NULL)
     private String displayName = "";
 
+    @SerdeSkipDeserializingIf(SerdeSkipDeserializingIf.SkipDeIf.IS_MISSING)
+    @SerdeSkipSerializingIf(SerdeSkipSerializingIf.SkipSerIf.IS_NULL)
+    private String language = "";
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         PlayerEntry entry = (PlayerEntry) o;
-        return Objects.equals(uuid, entry.uuid) && Objects.equals(name, entry.name) && Objects.equals(discordId, entry.discordId) && Objects.equals(displayName, entry.displayName);
+        return Objects.equals(uuid, entry.uuid)
+                && Objects.equals(name, entry.name)
+                && Objects.equals(discordId, entry.discordId)
+                && Objects.equals(displayName, entry.displayName)
+                && Objects.equals(language, entry.language);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, name, discordId, displayName);
+        return Objects.hash(uuid, name, discordId, displayName, language);
     }
 
     public static PlayerEntry of(String name) {
