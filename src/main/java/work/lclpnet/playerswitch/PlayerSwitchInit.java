@@ -7,12 +7,14 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import work.lclpnet.kibu.cmd.impl.CommandContainer;
 import work.lclpnet.kibu.config.ConfigManager;
 import work.lclpnet.kibu.hook.HookContainer;
 import work.lclpnet.kibu.scheduler.KibuScheduling;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.util.ModTranslations;
+import work.lclpnet.playerswitch.cmd.TestDiscordDmCommand;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.config.ConfigValidator;
 import work.lclpnet.playerswitch.util.*;
@@ -70,6 +72,10 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 			LOGGER.error("Shutting down server as player-switch is not configured. For more information, see https://github.com/LCLPYT/player-switch");
 			server.stop(false);
 		});
+
+        var container = new CommandContainer();
+
+        new TestDiscordDmCommand(discordBot, translations, configManager).register(container);
 
 		AtomicBoolean destroyed = new AtomicBoolean(false);
 
