@@ -54,7 +54,7 @@ public class ServerMotd {
                 .getString();
 
         var msg = firstLine().append("\n").append(translations.translateText(
-                language, "player-switch.motd.now_playing", styled(username, YELLOW)
+                language, "player-switch.motd.now_playing", PlayerUtil.formatUsername(username, config)
         ).formatted(AQUA));
 
         if (config.getParticipants().size() > 1) {
@@ -72,7 +72,7 @@ public class ServerMotd {
         String language = configManager.config().getMotd().getLanguage();
 
         var msg = firstLine().append("\n").append(translations.translateText(
-                language, "player-switch.motd.waiting", styled(username, YELLOW)
+                language, "player-switch.motd.waiting", PlayerUtil.formatUsername(username, configManager.config())
         ).formatted(GRAY, ITALIC));
 
         setMotd(msg);

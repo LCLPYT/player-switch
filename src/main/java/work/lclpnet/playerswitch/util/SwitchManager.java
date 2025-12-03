@@ -36,7 +36,6 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.lang.Math.max;
 import static net.minecraft.util.Formatting.*;
-import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 
 public class SwitchManager {
 
@@ -157,7 +156,7 @@ public class SwitchManager {
         }
 
         return playerUtil.getUsername(entry).join()
-                .map(name -> translations.translateText(language, "player-switch.other_user_turn", styled(name, YELLOW)).formatted(RED))
+                .map(name -> translations.translateText(language, "player-switch.other_user_turn", PlayerUtil.formatUsername(name, config)).formatted(RED))
                 .orElseGet(() -> translations.translateText(language, "player-switch.not_your_turn").formatted(RED));
     }
 
@@ -288,7 +287,7 @@ public class SwitchManager {
     private void disconnectPlayer(ServerPlayerEntity player) {
         Text msg = config.getCurrentPlayerEntry()
                 .flatMap(entry -> playerUtil.getUsername(entry).join())
-                .map(name -> translations.translateText(player, "player-switch.time_expired_other_user", styled(name, YELLOW)).formatted(GRAY))
+                .map(name -> translations.translateText(player, "player-switch.time_expired_other_user", PlayerUtil.formatUsername(name, config)).formatted(GRAY))
                 .orElseGet(() -> translations.translateText(player, "player-switch.time_expired").formatted(GRAY));
 
         player.networkHandler.disconnect(msg);

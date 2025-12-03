@@ -59,6 +59,9 @@ public class Config {
     @SerdeComment("Code of conduct. Is shown every time a player joins the server.")
     private final CodeOfConductConfig codeOfConduct = new CodeOfConductConfig();
 
+    @SerdeComment("Whether to hide the current player from others")
+    private boolean hideCurrentPlayer = false;
+
     public Optional<PlayerEntry> getCurrentPlayerEntry() {
         if (participants.isEmpty()) {
             return Optional.empty();

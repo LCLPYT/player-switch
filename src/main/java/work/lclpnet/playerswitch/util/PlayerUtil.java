@@ -1,6 +1,9 @@
 package work.lclpnet.playerswitch.util;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+import work.lclpnet.kibu.translate.text.FormatWrapper;
+import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.config.PlayerEntry;
 
 import java.util.HashMap;
@@ -9,6 +12,10 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
+
+import static net.minecraft.util.Formatting.OBFUSCATED;
+import static net.minecraft.util.Formatting.YELLOW;
+import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 
 public class PlayerUtil {
 
@@ -53,5 +60,21 @@ public class PlayerUtil {
             String nameFromConfig = entry.getName();
             return nameFromConfig.isBlank() ? "?" : nameFromConfig;
         }));
+    }
+
+    public static @NotNull FormatWrapper formatUsername(String username, Config config) {
+        boolean hide = config.isHideCurrentPlayer();
+
+        if (hide) {
+            username = "?".repeat(6);
+        }
+
+        FormatWrapper formatted = styled(username, YELLOW);
+
+        if (hide) {
+            formatted.formatted(OBFUSCATED);
+        }
+
+        return formatted;
     }
 }

@@ -38,7 +38,7 @@ public class DiscordWebhook {
         var config = configManager.config();
         var webhookConfig = config.getDiscordWebhook();
 
-        if (!webhookConfig.isEnabled()) return;
+        if (!webhookConfig.isEnabled() || config.isHideCurrentPlayer()) return;
 
         String uri = webhookConfig.getUrl();
 
