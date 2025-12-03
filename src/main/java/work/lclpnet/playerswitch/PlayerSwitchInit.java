@@ -120,6 +120,8 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
         queue.restore(getQueuePath());
 
+        config.getCurrentPlayerEntry().ifPresent(queue::sync);
+
         return queue;
     }
 

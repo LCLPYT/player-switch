@@ -49,10 +49,11 @@ public class PlayerEntry {
         return Objects.hash(uuid, name, discordId, displayName, language);
     }
 
-    public static PlayerEntry of(String name) {
-        var entry = new PlayerEntry();
-        entry.setName(name);
-
-        return entry;
+    @Override
+    public String toString() {
+        return "PlayerEntry{" +
+                "name='" + name + '\'' +
+                ", displayName='" + displayName + '\'' +
+                '}';
     }
 }

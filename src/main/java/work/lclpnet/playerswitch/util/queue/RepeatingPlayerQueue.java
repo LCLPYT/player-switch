@@ -62,4 +62,7 @@ public class RepeatingPlayerQueue implements PlayerQueue {
 
         return participants.get(next);
     }
+
+    @Override
+    public void sync(PlayerEntry current) {}
 }

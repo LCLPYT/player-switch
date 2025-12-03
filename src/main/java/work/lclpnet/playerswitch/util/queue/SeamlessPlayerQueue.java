@@ -6,6 +6,7 @@ import net.minecraft.util.Uuids;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import work.lclpnet.gaco.ds.queue.JsonFileQueuePersistence;
+import work.lclpnet.gaco.ds.queue.QueueTransfer;
 import work.lclpnet.gaco.ds.queue.SeamlessQueue;
 import work.lclpnet.playerswitch.config.PlayerEntry;
 
@@ -57,8 +58,16 @@ public class SeamlessPlayerQueue implements PlayerQueue {
             margin = max(margin, 1);
         }
 
-        var persistence = new JsonFileQueuePersistence<>(path, codec, logger);
-        var transfer = persistence.restore();
+        QueueTransfer<PlayerEntry> transfer;
+
+        try {
+            var persistence = new JsonFileQueuePersistence<>(path, codec, logger);
+
+            transfer = persistence.restore();
+        } catch (Throwable t) {
+            logger.error("Failed to restore queue", t);
+            transfer = QueueTransfer.empty();
+        }
 
         queue = new SeamlessQueue<>(playerEntries, new Random(), margin, transfer);
     }
@@ -82,5 +91,20 @@ public class SeamlessPlayerQueue implements PlayerQueue {
         queue.pushElement(entry);
 
         return entry;
+    }
+
+    @Override
+    public void sync(PlayerEntry current) {
+        if (current == null) return;
+
+        var queue = Objects.requireNonNull(this.queue, "Queue not initialized yet");
+
+        var history = queue.transfer().history();
+
+        // make sure the current player is the last history element in the queue
+        if (history.isEmpty() || !current.equals(history.getLast())) {
+            queue.pushElement(current);
+            queue.pushUpcoming(current);
+        }
     }
 }
