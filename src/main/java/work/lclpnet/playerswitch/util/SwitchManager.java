@@ -83,6 +83,7 @@ public class SwitchManager {
         hooks.registerHook(ServerPausedCallback.HOOK, this::onServerPaused);
         hooks.registerHook(PlayerConnectionHooks.QUIT, this::onPlayerDisconnect);
         hooks.registerHook(ServerMaxPlayersCallback.HOOK, this::modifyMaxPlayers);
+        hooks.registerHook(HideOnlinePlayersCallback.HOOK, this::shouldHideOnlinePlayers);
 
         ServerLifecycleEvents.BEFORE_SAVE.register(this::onBeforeSave);
 
@@ -91,6 +92,10 @@ public class SwitchManager {
         update();
 
         return true;
+    }
+
+    private boolean shouldHideOnlinePlayers() {
+        return config.isHideCurrentPlayer();
     }
 
     private void onPlayerHandlerDisconnect(ServerCommonNetworkHandler handler) {
