@@ -13,10 +13,12 @@ import work.lclpnet.kibu.hook.HookContainer;
 import work.lclpnet.kibu.scheduler.KibuScheduling;
 import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.translate.Translations;
+import work.lclpnet.kibu.translate.util.LocaleUtil;
 import work.lclpnet.kibu.translate.util.ModTranslations;
 import work.lclpnet.playerswitch.cmd.TestDiscordDmCommand;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.config.ConfigValidator;
+import work.lclpnet.playerswitch.hook.CodeOfConductCallback;
 import work.lclpnet.playerswitch.util.*;
 import work.lclpnet.playerswitch.util.msg.Messenger;
 import work.lclpnet.playerswitch.util.queue.PlayerQueue;
@@ -25,6 +27,9 @@ import work.lclpnet.playerswitch.util.queue.SeamlessPlayerQueue;
 
 import java.net.http.HttpClient;
 import java.nio.file.Path;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PlayerSwitchInit implements DedicatedServerModInitializer {
@@ -77,7 +82,9 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
         new TestDiscordDmCommand(discordBot, translations, configManager).register(container);
 
-		AtomicBoolean destroyed = new AtomicBoolean(false);
+        handleCodeOfConduct(configManager);
+
+        AtomicBoolean destroyed = new AtomicBoolean(false);
 
 		Runnable shutdown = () -> {
 			if (destroyed.getAndSet(true)) return;
@@ -97,6 +104,34 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
 		LOGGER.info("Initialized.");
 	}
+
+    private void handleCodeOfConduct(ConfigManager<Config> configManager) {
+        CodeOfConductCallback.HOOK.register((profile, lang) -> {
+            Config config = configManager.config();
+
+            var codeOfConduct = config.getCodeOfConduct();
+
+            if (!codeOfConduct.isEnabled() || config.getCurrentPlayerUuid()
+                    .filter(uuid -> uuid.equals(profile.id())).isEmpty())
+                return null;
+
+            var languages = codeOfConduct.getLanguages();
+
+            String text = languages.get(lang);
+
+            if (text == null && !languages.isEmpty()) {
+                text = languages.values().iterator().next();
+            }
+
+            if (text == null) return null;
+
+            ZonedDateTime now = ZonedDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG)
+                    .withLocale(LocaleUtil.getLocale(lang));
+
+            return text.concat("\n(%s)".formatted(now.format(formatter)));
+        });
+    }
 
     private void logStatus(ConfigManager<Config> configManager, PlayerUtil playerUtil) {
         var playerEntry = configManager.config().getCurrentPlayerEntry().orElse(null);

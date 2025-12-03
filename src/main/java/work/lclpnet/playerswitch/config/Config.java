@@ -56,6 +56,9 @@ public class Config {
     @SerdeComment("Turn timeout in seconds. If the current player does not play their turn within the timeout, the player will be skipped.")
     private long turnTimeoutSeconds = TimeUnit.DAYS.toSeconds(3);
 
+    @SerdeComment("Code of conduct. Is shown every time a player joins the server.")
+    private final CodeOfConductConfig codeOfConduct = new CodeOfConductConfig();
+
     public Optional<PlayerEntry> getCurrentPlayerEntry() {
         if (participants.isEmpty()) {
             return Optional.empty();
