@@ -1,5 +1,7 @@
 FROM eclipse-temurin:21-jdk-alpine AS builder
 
+ARG mc_version=1.21.10
+
 RUN apk add --no-cache --update curl go && \
     go install github.com/packwiz/packwiz@latest
 
@@ -14,7 +16,7 @@ WORKDIR /packwiz
 
 ## download fabric server
 RUN mkdir -p /server && \
-    mrpack-install server fabric --server-dir /server --server-file fabric-server-launcher.jar
+    mrpack-install server fabric --minecraft-version ${mc_version} --server-dir /server --server-file fabric-server-launcher.jar
 
 COPY docker/packwiz .
 
@@ -50,7 +52,7 @@ RUN addgroup -g 1000 minecraft && \
 WORKDIR /template
 
 # copy project-specific files
-COPY docker/run-wrapper.sh docker/run.sh docker/reset.sh ./
+COPY docker/run-wrapper.sh docker/run.sh ./
 
 # copy server files, mod artifact and server icon
 COPY --from=builder /server .

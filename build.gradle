@@ -69,6 +69,7 @@ dependencies {
     include(implementation("com.neovisionaries:nv-websocket-client:2.14"))
     include(implementation("net.sf.trove4j:core:3.1.0"))
     include(implementation("com.squareup.okio:okio:3.16.2"))
+    include(implementation("org.apache.commons:commons-collections4:4.5.0"))
 
     testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
 }

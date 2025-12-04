@@ -141,12 +141,6 @@ services:
       MAX_MEMORY: 2G
     volumes:
       - ./run:/data
-
-  reset:
-    image: ghcr.io/lclpyt/player-switch:1.21.8-latest
-    command: ./reset.sh
-    volumes:
-      - ./run:/data
 ```
 
 You can then use the docker compose commands listed below.
@@ -184,16 +178,8 @@ docker stop player-switch
 ```
 
 ### Resetting a run
+Just execute this command in the Minecraft console or as server operator:
 ```
-docker compose down server && docker compose up reset
+/reset_run
 ```
-
-Or alternatively via docker directly:
-```
-mkdir -p run/{config,world}
-docker container stop player-switch 2>/dev/null
-docker run \
-    --mount type=bind,src="$(pwd)/run/config,dst=/app/config" \
-    --mount type=bind,src="$(pwd)/run/world,dst=/app/world" \
-    --rm player-switch ./reset.sh
-```
+And then restart the server.

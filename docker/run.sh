@@ -2,6 +2,10 @@
 
 set -e
 
+# clean old files
+rm fabric-server-*
+rm -rf mods/
+
 # copy files to /data mount if needed
 rsync -r --ignore-existing /template/* .
 
