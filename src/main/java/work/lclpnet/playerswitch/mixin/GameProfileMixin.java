@@ -1,6 +1,7 @@
 package work.lclpnet.playerswitch.mixin;
 
 import com.mojang.authlib.GameProfile;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -33,7 +34,7 @@ public class GameProfileMixin implements PlayerSwitchGameProfile {
     }
 
     @Override
-    public GameProfile playerSwitch$getRealGameProfile() {
+    public @NotNull GameProfile playerSwitch$getRealGameProfile() {
         return realProfile;
     }
 }

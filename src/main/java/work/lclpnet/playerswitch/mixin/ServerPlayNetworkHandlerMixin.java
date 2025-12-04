@@ -9,6 +9,7 @@ import net.minecraft.server.network.ConnectedClientData;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -32,8 +33,8 @@ public abstract class ServerPlayNetworkHandlerMixin implements GameProfileCaptur
     private GameProfile realGameProfile;
 
     @Override
-    public GameProfile playerSwitch$getRealGameProfile() {
-        return realGameProfile;
+    public @NotNull GameProfile playerSwitch$getRealGameProfile() {
+        return realProfile();
     }
 
     @Inject(
@@ -47,6 +48,11 @@ public abstract class ServerPlayNetworkHandlerMixin implements GameProfileCaptur
         realGameProfile = PlayerSwitchGameProfile.get(player.getGameProfile()).playerSwitch$getRealGameProfile();
     }
 
+    @Unique
+    private GameProfile realProfile() {
+        return realGameProfile != null ? realGameProfile : player.getGameProfile();
+    }
+
     @ModifyArg(
             method = "onPlayerSession",
             at = @At(
@@ -55,7 +61,7 @@ public abstract class ServerPlayNetworkHandlerMixin implements GameProfileCaptur
             )
     )
     public GameProfile useRealGameProfileForSession(GameProfile gameProfile) {
-        return realGameProfile != null ? realGameProfile : player.getGameProfile();
+        return realProfile();
     }
 
     @ModifyArg(
@@ -66,7 +72,7 @@ public abstract class ServerPlayNetworkHandlerMixin implements GameProfileCaptur
             )
     )
     public UUID useRealUuidForSigning(UUID sender) {
-        return realGameProfile.id();
+        return realProfile().id();
     }
 
     @ModifyArg(
@@ -77,7 +83,7 @@ public abstract class ServerPlayNetworkHandlerMixin implements GameProfileCaptur
             )
     )
     public UUID useRealUuidForUnpacker(UUID sender) {
-        return realGameProfile.id();
+        return realProfile().id();
     }
 
     @Inject(

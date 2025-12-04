@@ -21,7 +21,7 @@ public class PlayerUnifier {
 
     public void setup(HookRegistrar hooks) {
         hooks.registerHook(GameProfileModificationCallback.HOOK, profile -> {
-            var unified = new GameProfile(config.getFixedUuid(), config.getFixedUsername());
+            var unified = new GameProfile(config.getFixedUuid(), config.getFixedUsername(), profile.properties());
 
             PlayerSwitchGameProfile.get(unified).playerSwitch$setRealGameProfile(profile);
 
