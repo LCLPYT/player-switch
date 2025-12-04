@@ -35,6 +35,8 @@ public class GameProfileMixin implements PlayerSwitchGameProfile {
 
     @Override
     public @NotNull GameProfile playerSwitch$getRealGameProfile() {
-        return realProfile;
+        var profile = realProfile;
+
+        return profile != null ? profile : (GameProfile) (Object) this;
     }
 }

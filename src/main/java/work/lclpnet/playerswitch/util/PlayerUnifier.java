@@ -36,4 +36,12 @@ public class PlayerUnifier {
     public static GameProfile getRealProfile(ServerPlayNetworkHandler networkHandler) {
         return GameProfileCapture.get(networkHandler).playerSwitch$getRealGameProfile();
     }
+
+    public static GameProfile getRealProfile(ServerPlayerEntity player) {
+        return getRealProfile(player.networkHandler);
+    }
+
+    public static GameProfile getRealProfile(GameProfile profile) {
+        return PlayerSwitchGameProfile.get(profile).playerSwitch$getRealGameProfile();
+    }
 }

@@ -6,6 +6,8 @@
     "GameProfileMixin",
     "MinecraftDedicatedServerMixin",
     "MinecraftServerMixin",
+    "PlayerEntityMixin",
+    "PlayerListS2CPacketEntryMixin",
     "PlayerManagerMixin",
     "PrepareSpawnTaskMixin",
     "ServerCommonNetworkHandlerAccessor",
