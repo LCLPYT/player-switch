@@ -18,7 +18,7 @@ public class Config {
     private List<PlayerEntry> participants = List.of();
 
     @SerdeComment("The index of the current participating player")
-    private int currentPlayer = 0;
+    private int currentPlayer = -1;
 
     @SerdeComment("The time the current player has already played, in ticks")
     private int elapsedTicks = 0;
@@ -61,6 +61,13 @@ public class Config {
 
     @SerdeComment("Whether to hide the current player from others")
     private boolean hideCurrentPlayer = false;
+
+    public void reset() {
+        setCurrentPlayer(-1);
+        setElapsedTicks(0);
+        setTotalTicks(0);
+        setTicksSinceLastSwitch(0);
+    }
 
     public Optional<PlayerEntry> getCurrentPlayerEntry() {
         if (participants.isEmpty()) {

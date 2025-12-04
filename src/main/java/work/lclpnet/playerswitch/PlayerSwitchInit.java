@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.kibu.cmd.impl.CommandContainer;
@@ -15,9 +16,11 @@ import work.lclpnet.kibu.scheduler.api.Scheduler;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.util.LocaleUtil;
 import work.lclpnet.kibu.translate.util.ModTranslations;
+import work.lclpnet.playerswitch.cmd.ResetRunCommand;
 import work.lclpnet.playerswitch.cmd.TestDiscordDmCommand;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.config.ConfigValidator;
+import work.lclpnet.playerswitch.config.PlayerEntry;
 import work.lclpnet.playerswitch.hook.CodeOfConductCallback;
 import work.lclpnet.playerswitch.util.*;
 import work.lclpnet.playerswitch.util.msg.Messenger;
@@ -25,17 +28,22 @@ import work.lclpnet.playerswitch.util.queue.PlayerQueue;
 import work.lclpnet.playerswitch.util.queue.RepeatingPlayerQueue;
 import work.lclpnet.playerswitch.util.queue.SeamlessPlayerQueue;
 
+import java.io.IOException;
 import java.net.http.HttpClient;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
 	public static final String MOD_ID = "player-switch";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+    private @Nullable String levelName = null;
 
 	@Override
 	public void onInitializeServer() {
@@ -62,9 +70,11 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
         var messenger = new Messenger(discordWebhook, discordBot);
 
-        var queue = loadQueue(configManager);
+        var queue = loadQueue(configManager, messenger);
 
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            levelName = server.getSaveProperties().getLevelName();
+
             var manager = new SwitchManager(configManager, playerUtil, translations, server, messenger, LOGGER, queue);
 
             boolean setupSuccess = manager.setup(scheduler, hooks);
@@ -78,9 +88,12 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 			server.stop(false);
 		});
 
+        AtomicBoolean resetRun = new AtomicBoolean(false);
+
         var container = new CommandContainer();
 
         new TestDiscordDmCommand(discordBot, translations, configManager).register(container);
+        new ResetRunCommand(resetRun).register(container);
 
         handleCodeOfConduct(configManager);
 
@@ -89,11 +102,19 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 		Runnable shutdown = () -> {
 			if (destroyed.getAndSet(true)) return;
 
+            boolean doResetRun = resetRun.get();
+
+            if (doResetRun) {
+                resetRun(configManager.config());
+            }
+
 			configManager.save();
 			configManager.close();
 			client.close();
 
-            queue.save(getQueuePath());
+            if (!doResetRun) {
+                queue.save(getQueuePath());
+            }
 
             discordBot.shutdown();
 		};
@@ -104,6 +125,36 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
 		LOGGER.info("Initialized.");
 	}
+
+    private void resetRun(Config config) {
+        config.reset();
+
+        try {
+            Files.deleteIfExists(getQueuePath());
+        } catch (IOException e) {
+            LOGGER.error("Failed to delete queue path", e);
+        }
+
+        String levelName = this.levelName;
+
+        if (levelName == null) return;
+
+        Path dir = Path.of(levelName);
+
+        try (var files = Files.walk(dir)) {
+            files.sorted(Comparator.reverseOrder())
+                    .filter(path -> !path.equals(dir))
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        } catch (IOException e) {
+            LOGGER.error("Failed to delete world", e);
+        }
+    }
 
     private void handleCodeOfConduct(ConfigManager<Config> configManager) {
         CodeOfConductCallback.HOOK.register((profile, lang) -> {
@@ -144,7 +195,7 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
         playerUtil.getSafeUsername(playerEntry).thenAccept(name -> LOGGER.info("Currently, it's {}'s turn", name));
     }
 
-    private PlayerQueue loadQueue(ConfigManager<Config> configManager) {
+    private PlayerQueue loadQueue(ConfigManager<Config> configManager, Messenger messenger) {
         var config = configManager.config();
         var participants = config.getParticipants();
 
@@ -155,9 +206,34 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
         queue.restore(getQueuePath());
 
+        if (config.getCurrentPlayer() < 0) {
+            chooseInitialPlayer(queue, config, messenger);
+        }
+
         config.getCurrentPlayerEntry().ifPresent(queue::sync);
 
         return queue;
+    }
+
+    private void chooseInitialPlayer(PlayerQueue queue, Config config, Messenger messenger) {
+        LOGGER.info("It's nobody turn currently, choosing initial participant entry...");
+
+        PlayerEntry initial = queue.next();
+
+        LOGGER.info("Chose {} as initial participant entry", initial);
+
+        int index = config.participantIndex(initial);
+
+        if (index == -1) {
+            LOGGER.error("Unknown initial participant entry: {}", index);
+            index = 0;
+        }
+
+        config.setCurrentPlayer(index);
+
+        queue.save(getQueuePath());
+
+        messenger.sendTurnNotification(initial);
     }
 
     private ConfigManager<Config> loadConfig(MojangAPI api) {
