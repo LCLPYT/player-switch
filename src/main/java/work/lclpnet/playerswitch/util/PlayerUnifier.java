@@ -20,13 +20,19 @@ public class PlayerUnifier {
     }
 
     public void setup(HookRegistrar hooks) {
-        hooks.registerHook(GameProfileModificationCallback.HOOK, profile -> {
-            var unified = new GameProfile(config.getFixedUuid(), config.getFixedUsername(), profile.properties());
+        hooks.registerHook(GameProfileModificationCallback.HOOK, this::modifyGameProfile);
+    }
 
-            PlayerSwitchGameProfile.get(unified).playerSwitch$setRealGameProfile(profile);
+    private GameProfile modifyGameProfile(GameProfile profile) {
+        if (!PlayerSwitchGameProfile.get(profile).playerSwitch$isRealProfile()) {
+            return profile;
+        }
 
-            return unified;
-        });
+        var unified = new GameProfile(config.getFixedUuid(), config.getFixedUsername(), profile.properties());
+
+        PlayerSwitchGameProfile.get(unified).playerSwitch$setRealGameProfile(profile);
+
+        return unified;
     }
 
     public static UUID getRealUuid(ServerPlayerEntity player) {

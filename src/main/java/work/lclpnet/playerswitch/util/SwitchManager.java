@@ -79,6 +79,7 @@ public class SwitchManager {
         hooks.registerHook(PlayerBeforeCheckCanJoinCallback.HOOK, this::beforeCheckCanJoin);
         hooks.registerHook(PlayerHandlerDisconnectCallback.HOOK, this::onPlayerHandlerDisconnect);
         hooks.registerHook(PlayerCanJoinCallback.HOOK, this::checkCanJoin);
+        hooks.registerHook(PlayerConnectionHooks.JOIN, this::onJoin);
         hooks.registerHook(ServerTickPauseCallback.HOOK, this::shouldPause);
         hooks.registerHook(ServerPausedCallback.HOOK, this::onServerPaused);
         hooks.registerHook(PlayerConnectionHooks.QUIT, this::onPlayerDisconnect);
@@ -92,6 +93,11 @@ public class SwitchManager {
         update();
 
         return true;
+    }
+
+    private void onJoin(ServerPlayerEntity player) {
+        UUID realId = PlayerUnifier.getRealProfile(player).id();
+        handlers.remove(realId);
     }
 
     private boolean shouldHideOnlinePlayers() {

@@ -9,12 +9,10 @@
     "PlayerEntityMixin",
     "PlayerListS2CPacketEntryMixin",
     "PlayerManagerMixin",
-    "PrepareSpawnTaskMixin",
     "ServerCommonNetworkHandlerAccessor",
     "ServerCommonNetworkHandlerMixin",
     "ServerConfigurationNetworkHandlerAccessor",
     "ServerConfigurationNetworkHandlerMixin",
-    "ServerLoginNetworkHandlerMixin",
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin"
   ],
