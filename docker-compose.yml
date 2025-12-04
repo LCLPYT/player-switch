@@ -11,13 +11,3 @@ services:
       MAX_MEMORY: 2G
     volumes:
       - ./run:/data
-
-  reset:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-    image: player-switch
-    command: ./reset.sh
-
-    volumes:
-      - ./run:/data

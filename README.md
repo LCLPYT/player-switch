@@ -40,11 +40,23 @@ Only one player can play the game at a time.
 #The time after which to switch to the next player, in ticks (1 second = 20 ticks, 1 minute = 1200 ticks, 10 minutes = 12000 ticks ...)
 switchDelayTicks = 12000
 
+#Turn timeout in seconds. If the current player does not play their turn within the timeout, the player will be skipped.
+turnTimeoutSeconds = 259200
+
+#Player ordering type to use
+#Possible options:
+#    REPEATING (participants list is repeated in the order it is defined)
+#    BALANCED_RANDOM (participants are drawn at random, but everyone gets their turn within a cycle, there is also a margin of 30% of the participant count before a player gets their turn again)
+queueType = "BALANCED_RANDOM"
+
 #The index of the current participating player. You can manually change it to modify the player whose turn it is currently.
 currentPlayer = 0
 
 #The time the current player has already played, in ticks
 elapsedTicks = 0
+
+#Ticks since the last switch.
+ticksSinceLastSwitch = 0
 
 #This username will be assigned to every player
 fixedUsername = "Player"
@@ -63,6 +75,20 @@ limitMaxPlayers = true
     #The language to use for the message of the day
     language = "en_us"
 
+#Code of conduct. Is shown every time a player joins the server.
+[codeOfConduct]
+    #Whether to enable the code of conduct feature
+    enabled = true
+
+    #Localized code of conduct text
+    [codeOfConduct.languages]
+        en_us = """
+English text to show...
+"""
+        de_de = """
+German text to show...
+"""
+
 #A Discord webhook can be configured so that notifications about new turns are sent to a Discord channel. 
 #Participants that have a Discord user ID defined will also be pinged when it's their turn.
 [discordWebhook]
@@ -71,6 +97,14 @@ limitMaxPlayers = true
 
     #The language to use for Discord messages
     messageLanguage = "en_us"
+
+#A Discord bot can be used to send players direct messages when it's their turn.
+[discordBot]
+    #Whether to enable the discord bot integration
+    enabled = true
+
+    #Discord bot secret token
+    token = ""
 ```
 
 ## Troubleshooting
