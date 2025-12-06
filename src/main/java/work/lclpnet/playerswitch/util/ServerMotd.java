@@ -12,30 +12,27 @@ import work.lclpnet.playerswitch.type.PlayerSwitchMinecraftServer;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static java.lang.Math.max;
 import static net.minecraft.util.Formatting.*;
-import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
-import static work.lclpnet.playerswitch.util.TimeHelper.formatTime;
 
 public class ServerMotd {
 
     private final MinecraftServer server;
     private final Translations translations;
     private final ConfigManager<Config> configManager;
+    private final StatusTexts statusTexts;
 
-    public ServerMotd(MinecraftServer server, Translations translations, ConfigManager<Config> configManager) {
+    public ServerMotd(MinecraftServer server, Translations translations, ConfigManager<Config> configManager, StatusTexts statusTexts) {
         this.server = server;
         this.translations = translations;
         this.configManager = configManager;
+        this.statusTexts = statusTexts;
     }
 
     public MutableText firstLine() {
         Config config = configManager.config();
         String language = config.getMotd().getLanguage();
 
-        String totalTime = formatTime(translations, config.getTotalTicks())
-                .translateTo(language)
-                .getString();
+        String totalTime = statusTexts.getTimeString(config.getTotalTicks(), language);
 
         return Text.empty()
                 .append(translations.translateText(language, "player-switch.motd.subject").formatted(GREEN))
@@ -43,45 +40,8 @@ public class ServerMotd {
                 .append(Text.literal('«' + totalTime + '»').formatted(GOLD));
     }
 
-    public void currentlyPlaying(String username) {
-        Config config = configManager.config();
-        String language = config.getMotd().getLanguage();
-
-        int remainingTicks = max(0, config.getSwitchDelayTicks() - config.getElapsedTicks());
-
-        String turnTimeRemaining = formatTime(translations, remainingTicks)
-                .translateTo(language)
-                .getString();
-
-        var msg = firstLine().append("\n").append(translations.translateText(
-                language, "player-switch.motd.now_playing", PlayerUtil.formatUsername(username, config)
-        ).formatted(AQUA));
-
-        if (config.getParticipants().size() > 1) {
-            msg.append(Text.literal(" (").formatted(AQUA)
-                    .append(translations.translateText(
-                            language, "player-switch.motd.time_left", styled(turnTimeRemaining, YELLOW)
-                    ))
-                    .append(")"));
-        }
-
-        setMotd(msg);
-    }
-
-    public void currentlyWaiting(String username) {
-        String language = configManager.config().getMotd().getLanguage();
-
-        var msg = firstLine().append("\n").append(translations.translateText(
-                language, "player-switch.motd.waiting", PlayerUtil.formatUsername(username, configManager.config())
-        ).formatted(GRAY, ITALIC));
-
-        setMotd(msg);
-    }
-
-    public void noParticipants() {
-        var msg = firstLine()
-                .append("\n")
-                .append(Text.literal("No participants configured").formatted(RED));
+    public void setStatus(Text status) {
+        var msg = firstLine().append("\n").append(status);
 
         setMotd(msg);
     }

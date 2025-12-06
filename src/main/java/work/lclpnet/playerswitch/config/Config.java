@@ -62,11 +62,15 @@ public class Config {
     @SerdeComment("Whether to hide the current player from others")
     private boolean hideCurrentPlayer = false;
 
+    @SerdeComment("Turn count. Increments with every player switch")
+    private int turnCount = 1;
+
     public void reset() {
         setCurrentPlayer(-1);
         setElapsedTicks(0);
         setTotalTicks(0);
         setTicksSinceLastSwitch(0);
+        setTurnCount(1);
     }
 
     public Optional<PlayerEntry> getCurrentPlayerEntry() {

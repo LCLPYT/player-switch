@@ -12,4 +12,10 @@ public class DiscordBotConfig {
 
     @SerdeComment("Discord bot secret token")
     private String token = "";
+
+    @SerdeComment("Display info about the run via the activity status of the bot")
+    private boolean useStatusAsActivity = true;
+
+    @SerdeComment("Language for general messages, such as activity status")
+    private String language = "en_us";
 }

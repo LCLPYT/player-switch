@@ -13,11 +13,13 @@
   "player-switch.motd.subject": "Player-Switch challenge",
   "player-switch.motd.now_playing": "Now playing: %s",
   "player-switch.motd.time_left": "%s left",
-  "player-switch.motd.waiting": "Waiting for %s ...",
+  "player-switch.motd.waiting": "Waiting for %s",
   "player-switch.discord.your_turn_mention": "<@%s> It's your turn now!",
   "player-switch.discord.player_turn_mention": "<@%s> It's **%s**'s turn now!",
   "player-switch.discord.player_turn": "It's **%s**'s turn now.",
   "player-switch.discord.next_turn": "It's the next player's turn now.",
   "player-switch.discord.your_turn": "It's your turn now in Player Switch. Good luck!",
-  "player-switch.discord.test_dm": "You have been assigned to participate in Minecraft Player Switch. Make sure to enable mobile notifications to get notified when its your turn. If it worked for this message, you are good to go. Have fun!"
+  "player-switch.discord.test_dm": "You have been assigned to participate in Minecraft Player Switch. Make sure to enable mobile notifications to get notified when its your turn. If it worked for this message, you are good to go. Have fun!",
+  "player-switch.discord.bot_status.turn_stats": "Turn #%s «%s»",
+  "player-switch.discord.bot_status.turn_status": "%s | %s"
 }

@@ -2,6 +2,7 @@ package work.lclpnet.playerswitch.util;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -17,18 +18,20 @@ public class DiscordBot {
 
     private final ConfigManager<Config> configManager;
     private final Translations translations;
+    private final StatusTexts statusTexts;
     private final Logger logger;
     private @Nullable JDA jda = null;
     private boolean ready = false;
 
-    public DiscordBot(ConfigManager<Config> configManager, Translations translations, Logger logger) {
+    public DiscordBot(ConfigManager<Config> configManager, Translations translations, StatusTexts statusTexts, Logger logger) {
         this.configManager = configManager;
         this.translations = translations;
+        this.statusTexts = statusTexts;
         this.logger = logger;
     }
 
     public CompletableFuture<Void> setup() {
-        DiscordBotConfig config = configManager.config().getDiscordBot();
+        DiscordBotConfig config = botConfig();
 
         if (!config.isEnabled()) return CompletableFuture.completedFuture(null);
 
@@ -44,6 +47,10 @@ public class DiscordBot {
                 logger.error("Failed to setup discord bot", e);
             }
         });
+    }
+
+    private DiscordBotConfig botConfig() {
+        return configManager.config().getDiscordBot();
     }
 
     public void shutdown() {
@@ -90,5 +97,48 @@ public class DiscordBot {
         String msg = translations.translate(language, "player-switch.discord.your_turn");
 
         sendDirectMessage(discordId, msg);
+    }
+
+    public void setActivity(String status) {
+        var jda = this.jda;
+
+        if (jda == null || !ready || !botConfig().isUseStatusAsActivity()) return;
+
+        jda.getPresence().setActivity(Activity.customStatus(status));
+    }
+
+    public void updateActivityStatus() {
+        if (jda == null || !ready || !botConfig().isUseStatusAsActivity()) return;
+
+        Config config = configManager.config();
+        String language = botConfig().getLanguage();
+
+        String totalTime = statusTexts.getTimeString(config.getTotalTicks(), language);
+
+        String stats = translations.translate(
+                language,
+                "player-switch.discord.bot_status.turn_stats",
+                config.getTurnCount(),
+                totalTime
+        );
+
+        if (config.isHideCurrentPlayer()) {
+            setActivity(stats);
+            return;
+        }
+
+        statusTexts.prepareStatus().thenAccept(opt -> opt.ifPresentOrElse(
+                status -> {
+                    String activity = translations.translate(
+                            language,
+                            "player-switch.discord.bot_status.turn_status",
+                            status.getString(),
+                            stats
+                    );
+
+                    setActivity(activity);
+                },
+                () -> setActivity(stats)
+        ));
     }
 }

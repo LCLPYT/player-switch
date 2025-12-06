@@ -64,8 +64,10 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 		var unifier = new PlayerUnifier(configManager.config());
 		unifier.setup(hooks);
 
+        var statusTexts = new StatusTexts(translations, configManager, playerUtil, LOGGER);
+
         var discordWebhook = new DiscordWebhook(configManager, client, translations, playerUtil, LOGGER);
-        var discordBot = new DiscordBot(configManager, translations, LOGGER);
+        var discordBot = new DiscordBot(configManager, translations, statusTexts, LOGGER);
 
         discordBot.setup().join();
 
@@ -83,12 +85,16 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             levelName = server.getSaveProperties().getLevelName();
 
-            var manager = new SwitchManager(configManager, playerUtil, translations, server, messenger, LOGGER, queue);
+            statusTexts.setPlayerManager(server.getPlayerManager());
+
+            var manager = new SwitchManager(configManager, playerUtil, translations, server, messenger, LOGGER, statusTexts, queue);
 
             boolean setupSuccess = manager.setup(scheduler, hooks);
 
 			if (setupSuccess) {
                 new SkipCommand(manager).register(container);
+
+                discordBot.updateActivityStatus();
 
                 logStatus(configManager, playerUtil);
                 return;

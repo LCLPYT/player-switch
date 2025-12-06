@@ -18,4 +18,8 @@ public class Messenger {
         discordWebhook.sendTurnNotification(playerEntry);
         discordBot.sendTurnNotification(playerEntry);
     }
+
+    public void onNextTurn() {
+        discordBot.updateActivityStatus();
+    }
 }

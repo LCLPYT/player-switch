@@ -48,6 +48,7 @@ public class SwitchManager {
     private final MinecraftServer server;
     private final Messenger messenger;
     private final Logger logger;
+    private final StatusTexts statusTexts;
     private final ServerMotd motd;
     private final Map<UUID, ServerConfigurationNetworkHandler> handlers = new HashMap<>();
     private final PlayerQueue queue;
@@ -56,7 +57,9 @@ public class SwitchManager {
     private int motdUpdateTimer = 0;
 
     public SwitchManager(ConfigManager<Config> configManager, PlayerUtil playerUtil, Translations translations,
-                         MinecraftServer server, Messenger messenger, Logger logger, PlayerQueue queue) {
+                         MinecraftServer server, Messenger messenger, Logger logger, StatusTexts statusTexts,
+                         PlayerQueue queue) {
+
         this.configManager = configManager;
         this.config = configManager.config();
         this.playerUtil = playerUtil;
@@ -64,9 +67,10 @@ public class SwitchManager {
         this.server = server;
         this.messenger = messenger;
         this.logger = logger;
+        this.statusTexts = statusTexts;
         this.queue = queue;
 
-        motd = new ServerMotd(server, translations, configManager);
+        motd = new ServerMotd(server, translations, configManager, statusTexts);
         turnTimeout = new TurnTimeout(configManager, logger, this::skipPlayer);
     }
 
@@ -134,10 +138,6 @@ public class SwitchManager {
         return config.getCurrentPlayerUuid()
                 .map(uuid -> uuid.equals(PlayerUnifier.getRealUuid(player)))
                 .orElse(false);
-    }
-
-    private Optional<CompletableFuture<Optional<String>>> preloadUsername() {
-        return config.getCurrentPlayerEntry().map(playerUtil::getUsername);
     }
 
     private @Nullable Text checkCanJoin(SocketAddress socketAddress, PlayerConfigEntry playerEntry) {
@@ -209,27 +209,10 @@ public class SwitchManager {
     }
 
     private void updateMotd() {
-        preloadUsername().ifPresentOrElse(
-                future -> future.thenAccept(opt -> opt.ifPresentOrElse(
-                        this::updateMotd,
-                        () -> updateMotd("?")
-                )).exceptionally(t -> {
-                    logger.error("Failed to preload username", t);
-                    motd.setMotd(motd.firstLine());
-                    return null;
-                }),
-                motd::noParticipants
-        );
-    }
-
-    private void updateMotd(String username) {
-        if (server.getPlayerManager() == null) return;
-
-        if (PlayerLookup.all(server).isEmpty()) {
-            motd.currentlyWaiting(username);
-        } else {
-            motd.currentlyPlaying(username);
-        }
+        statusTexts.prepareStatus().thenAccept(opt -> opt.ifPresentOrElse(
+                motd::setStatus,
+                () -> motd.setMotd(motd.firstLine())
+        ));
     }
 
     public void skipPlayer() {
@@ -277,10 +260,12 @@ public class SwitchManager {
 
         config.setElapsedTicks(0);
         config.setCurrentPlayer(nextPlayer);
+        config.setTurnCount(config.getTurnCount() + 1);
 
         prevPlayer.ifPresent(this::disconnectPlayer);
 
         messenger.sendTurnNotification(next);
+        messenger.onNextTurn();
 
         logStatus(current, next);
     }
