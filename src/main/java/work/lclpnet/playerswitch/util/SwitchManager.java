@@ -67,7 +67,7 @@ public class SwitchManager {
         this.queue = queue;
 
         motd = new ServerMotd(server, translations, configManager);
-        turnTimeout = new TurnTimeout(configManager, this::skipPlayer);
+        turnTimeout = new TurnTimeout(configManager, logger, this::skipPlayer);
     }
 
     public boolean setup(TaskScheduler scheduler, HookRegistrar hooks) {
@@ -232,7 +232,7 @@ public class SwitchManager {
         }
     }
 
-    private void skipPlayer() {
+    public void skipPlayer() {
         int currentPlayer = config.getCurrentPlayer();
 
         var participants = config.getParticipants();
@@ -242,9 +242,9 @@ public class SwitchManager {
         if (currentPlayer >= 0 && currentPlayer < participants.size()) {
             PlayerEntry current = participants.get(currentPlayer);
 
-            logger.info("Skipping player {} as the configured turn timeout was reached", current.getName());
+            logger.info("Skipping player {}'s turn", current.getName());
         } else {
-            logger.info("Skipping current player as the configured turn timeout was reached");
+            logger.info("Skipping the turn of the current player");
         }
 
         switchPlayer();
@@ -309,9 +309,7 @@ public class SwitchManager {
 
         var realProfile = GameProfileCapture.get(player.networkHandler).playerSwitch$getRealGameProfile();
 
-        if (realProfile != null) {
-            handlers.remove(realProfile.id());
-        }
+        handlers.remove(realProfile.id());
     }
 
     private void onServerPaused(MinecraftServer server) {

@@ -17,6 +17,7 @@ import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.kibu.translate.util.LocaleUtil;
 import work.lclpnet.kibu.translate.util.ModTranslations;
 import work.lclpnet.playerswitch.cmd.ResetRunCommand;
+import work.lclpnet.playerswitch.cmd.SkipCommand;
 import work.lclpnet.playerswitch.cmd.TestDiscordDmCommand;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.config.ConfigValidator;
@@ -72,6 +73,13 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
         var queue = loadQueue(configManager, messenger);
 
+        AtomicBoolean resetRun = new AtomicBoolean(false);
+
+        var container = new CommandContainer();
+
+        new TestDiscordDmCommand(discordBot, translations, configManager).register(container);
+        new ResetRunCommand(resetRun).register(container);
+
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             levelName = server.getSaveProperties().getLevelName();
 
@@ -80,6 +88,8 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
             boolean setupSuccess = manager.setup(scheduler, hooks);
 
 			if (setupSuccess) {
+                new SkipCommand(manager).register(container);
+
                 logStatus(configManager, playerUtil);
                 return;
             }
@@ -88,12 +98,6 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 			server.stop(false);
 		});
 
-        AtomicBoolean resetRun = new AtomicBoolean(false);
-
-        var container = new CommandContainer();
-
-        new TestDiscordDmCommand(discordBot, translations, configManager).register(container);
-        new ResetRunCommand(resetRun).register(container);
 
         handleCodeOfConduct(configManager);
 

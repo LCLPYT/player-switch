@@ -3,6 +3,7 @@ package work.lclpnet.playerswitch.cmd;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.cmd.type.KibuCommand;
 import work.lclpnet.kibu.config.ConfigManager;
@@ -31,6 +32,8 @@ public class TestDiscordDmCommand implements KibuCommand {
     }
 
     private int testDiscordCommand(CommandContext<ServerCommandSource> ctx) {
+        ctx.getSource().sendMessage(Text.literal("Sending participation messages to all participants with discord ids via Discord direct messages..."));
+
         for (PlayerEntry participant : configManager.config().getParticipants()) {
             String language = participant.getLanguage();
 
