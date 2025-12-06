@@ -58,6 +58,9 @@ elapsedTicks = 0
 #Ticks since the last switch.
 ticksSinceLastSwitch = 0
 
+#Turn count. Increments with every player switch
+turnCount = 1
+
 #This username will be assigned to every player
 fixedUsername = "Player"
 
@@ -105,6 +108,12 @@ German text to show...
 
     #Discord bot secret token
     token = ""
+
+    #Display info about the run via the activity status of the bot
+    useStatusAsActivity = true
+
+    #Language for general messages, such as activity status
+    language = "en_us"
 ```
 
 ## Troubleshooting
@@ -134,6 +143,8 @@ You can simplify the process by creating a `docker-compose.yml` in a directory o
 services:
   server:
     image: ghcr.io/lclpyt/player-switch:1.21.8-latest
+    stdin_open: true
+    tty: true
     ports:
       - "25565:25565"
     environment:
@@ -183,3 +194,10 @@ Just execute this command in the Minecraft console or as server operator:
 /reset_run
 ```
 And then restart the server.
+
+If you're using docker compose, you can use the following command to attach to the server console:
+```
+docker compose attach server
+```
+If you press Ctrl+C, the process will be terminated.
+If you just want to detach the console, send the escape sequence: Ctrl+P and then Ctrl+Q.
