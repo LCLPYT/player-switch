@@ -19,7 +19,7 @@ public class Messenger {
         discordBot.sendTurnNotification(playerEntry);
     }
 
-    public void onNextTurn() {
+    public void updateStatus() {
         discordBot.updateActivityStatus();
     }
 }

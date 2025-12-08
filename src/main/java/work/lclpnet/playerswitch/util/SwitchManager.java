@@ -206,6 +206,8 @@ public class SwitchManager {
         }
 
         configManager.save();
+
+        messenger.updateStatus();
     }
 
     private void updateMotd() {
@@ -265,7 +267,6 @@ public class SwitchManager {
         prevPlayer.ifPresent(this::disconnectPlayer);
 
         messenger.sendTurnNotification(next);
-        messenger.onNextTurn();
 
         logStatus(current, next);
     }
