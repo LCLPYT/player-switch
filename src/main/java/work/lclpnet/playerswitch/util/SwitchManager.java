@@ -176,7 +176,7 @@ public class SwitchManager {
         int ticksLeft = max(0, config.getSwitchDelayTicks() - ticks);
 
         if (ticksLeft == 0) {
-            switchPlayer();
+            switchPlayer(false);
             return;
         }
 
@@ -232,16 +232,16 @@ public class SwitchManager {
             logger.info("Skipping the turn of the current player");
         }
 
-        switchPlayer();
+        switchPlayer(true);
     }
 
-    private void switchPlayer() {
+    private void switchPlayer(boolean skipped) {
         config.setTicksSinceLastSwitch(0);
-        doSwitchPlayer();
+        doSwitchPlayer(skipped);
         update();
     }
 
-    private void doSwitchPlayer() {
+    private void doSwitchPlayer(boolean skipped) {
         int currentPlayer = config.getCurrentPlayer();
 
         PlayerEntry current = config.getParticipants().get(currentPlayer);
@@ -262,7 +262,10 @@ public class SwitchManager {
 
         config.setElapsedTicks(0);
         config.setCurrentPlayer(nextPlayer);
-        config.setTurnCount(config.getTurnCount() + 1);
+
+        if (!skipped) {
+            config.setTurnCount(config.getTurnCount() + 1);
+        }
 
         prevPlayer.ifPresent(this::disconnectPlayer);
 
