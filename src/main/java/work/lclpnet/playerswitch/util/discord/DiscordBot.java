@@ -25,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 public class DiscordBot {
@@ -124,6 +125,16 @@ public class DiscordBot {
     }
 
     public void sendTurnNotification(PlayerEntry playerEntry) {
+        removeSkipButtonFromLastInteraction(playerEntry);
+        sendTurnNotification(playerEntry, "player-switch.discord.your_turn");
+    }
+
+    public void sendTurnReminder(PlayerEntry playerEntry) {
+        modifyLastInteraction(playerEntry, msg -> msg.delete().queue());
+        sendTurnNotification(playerEntry, "player-switch.discord.turn_reminder");
+    }
+
+    private void sendTurnNotification(PlayerEntry playerEntry, String messageKey) {
         if (!ready) return;
 
         String discordId = playerEntry.getDiscordId();
@@ -142,14 +153,8 @@ public class DiscordBot {
 
         String deadlineFormatted = dateFormatter.format(deadline);
 
-        if (!config.getDiscordBot().isSkipButton()) {
-            String msg = translations.translate(language, "player-switch.discord.your_turn", deadlineFormatted);
-            sendDirectMessage(playerEntry, msg);
-            return;
-        }
-
         String skipLabel = translations.translate(language, "player-switch.discord.skip_turn_label");
-        String msg = translations.translate(language, "player-switch.discord.your_turn", deadlineFormatted, skipLabel);
+        String msg = translations.translate(language, messageKey, deadlineFormatted, skipLabel);
 
         sendDirectMessage(playerEntry, msg, true, action -> action
                 .addComponents(ActionRow.of(Button.danger(SKIP_TURN_BUTTON_ID, skipLabel))));
@@ -215,7 +220,11 @@ public class DiscordBot {
         }
     }
 
-    public void removeSkipButton(PlayerEntry playerEntry) {
+    public void removeSkipButtonFromLastInteraction(PlayerEntry playerEntry) {
+        modifyLastInteraction(playerEntry, msg -> msg.editMessageComponents().queue());
+    }
+
+    public void modifyLastInteraction(PlayerEntry playerEntry, Consumer<Message> action) {
         String userId = playerEntry.getDiscordId();
         String messageId = playerEntry.getLastInteractionMessageId();
 
@@ -227,7 +236,7 @@ public class DiscordBot {
             jda.retrieveUserById(userId)
                     .queue(user -> user.openPrivateChannel()
                             .queue(channel -> channel.retrieveMessageById(messageId)
-                                    .queue(msg -> msg.editMessageComponents().queue())));
+                                    .queue(action)));
         } catch (Throwable t) {
             logger.error("Failed to send discord direct message to user '{}'", userId, t);
         }

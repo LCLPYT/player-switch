@@ -28,6 +28,10 @@ public class Messenger {
     }
 
     public void onTurnOver(PlayerEntry playerEntry) {
-        discordBot.removeSkipButton(playerEntry);
+        discordBot.removeSkipButtonFromLastInteraction(playerEntry);
+    }
+
+    public void sendTurnReminder(PlayerEntry playerEntry) {
+        discordBot.sendTurnReminder(playerEntry);
     }
 }

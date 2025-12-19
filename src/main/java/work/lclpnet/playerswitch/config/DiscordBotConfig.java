@@ -4,6 +4,8 @@ import com.electronwill.nightconfig.core.serde.annotations.SerdeComment;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.concurrent.TimeUnit;
+
 @Getter @Setter
 public class DiscordBotConfig {
 
@@ -19,6 +21,6 @@ public class DiscordBotConfig {
     @SerdeComment("Language for general messages, such as activity status")
     private String language = "en_us";
 
-    @SerdeComment("Adds a button to the turn notification in the DMs that can be used to skip the players own turn")
-    private boolean skipButton = true;
+    @SerdeComment("The time in seconds after which a reminder about the current turn will be sent. Will be clamped to at least 60 seconds. Set to -1 to disable reminders.")
+    private long turnReminderSeconds = TimeUnit.HOURS.toSeconds(36);
 }

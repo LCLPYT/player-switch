@@ -71,7 +71,7 @@ public class SwitchManager {
         this.queue = queue;
 
         motd = new ServerMotd(server, translations, configManager, statusTexts);
-        turnTimeout = new TurnTimeout(configManager, logger, this::skipPlayer);
+        turnTimeout = new TurnTimeout(configManager, messenger, logger, this::skipPlayer);
     }
 
     public boolean setup(TaskScheduler scheduler, HookRegistrar hooks) {
