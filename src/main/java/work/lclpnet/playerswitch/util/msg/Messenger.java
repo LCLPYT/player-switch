@@ -26,4 +26,8 @@ public class Messenger {
     public void sendSkipNotification(PlayerEntry playerEntry) {
         discordBot.sendSkipNotification(playerEntry);
     }
+
+    public void onTurnOver(PlayerEntry playerEntry) {
+        discordBot.removeSkipButton(playerEntry);
+    }
 }

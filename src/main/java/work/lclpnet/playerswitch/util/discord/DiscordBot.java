@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import org.jetbrains.annotations.Nullable;
@@ -88,11 +89,12 @@ public class DiscordBot {
         }
     }
 
-    public void sendDirectMessage(String userId, String message) {
-        sendDirectMessage(userId, message, UnaryOperator.identity());
+    public void sendDirectMessage(PlayerEntry playerEntry, String message) {
+        sendDirectMessage(playerEntry, message, false, UnaryOperator.identity());
     }
 
-    public void sendDirectMessage(String userId, String message, UnaryOperator<MessageCreateAction> processor) {
+    public void sendDirectMessage(PlayerEntry playerEntry, String message, boolean storeRef, UnaryOperator<MessageCreateAction> processor) {
+        String userId = playerEntry.getDiscordId();
         var jda = this.jda;
 
         if (!ready || jda == null || userId.isBlank()) return;
@@ -100,10 +102,25 @@ public class DiscordBot {
         try {
             jda.retrieveUserById(userId)
                     .queue(user -> user.openPrivateChannel()
-                            .queue(channel -> processor.apply(channel.sendMessage(message)).queue()));
+                            .queue(channel -> processor.apply(channel.sendMessage(message))
+                                    .queue(sentMsg -> {
+                                        if (!storeRef) return;
+
+                                        storeMessageReference(sentMsg, userId);
+                                    })));
         } catch (Throwable t) {
             logger.error("Failed to send discord direct message to user '{}'", userId, t);
         }
+    }
+
+    private void storeMessageReference(Message sentMsg, String userId) {
+        // need to get the fresh instance of the player entry, since the instance could have been swapped since
+        PlayerEntry freshEntry = configManager.config().getPlayerEntryByDiscordId(userId).orElse(null);
+
+        if (freshEntry == null) return;
+
+        freshEntry.setLastInteractionMessageId(sentMsg.getId());
+        configManager.save();
     }
 
     public void sendTurnNotification(PlayerEntry playerEntry) {
@@ -127,28 +144,24 @@ public class DiscordBot {
 
         if (!config.getDiscordBot().isSkipButton()) {
             String msg = translations.translate(language, "player-switch.discord.your_turn", deadlineFormatted);
-            sendDirectMessage(discordId, msg);
+            sendDirectMessage(playerEntry, msg);
             return;
         }
 
         String skipLabel = translations.translate(language, "player-switch.discord.skip_turn_label");
         String msg = translations.translate(language, "player-switch.discord.your_turn", deadlineFormatted, skipLabel);
 
-        sendDirectMessage(discordId, msg, action -> action
+        sendDirectMessage(playerEntry, msg, true, action -> action
                 .addComponents(ActionRow.of(Button.danger(SKIP_TURN_BUTTON_ID, skipLabel))));
     }
 
     public void sendSkipNotification(PlayerEntry playerEntry) {
         if (!ready) return;
 
-        String discordId = playerEntry.getDiscordId();
-
-        if (discordId.isBlank()) return;
-
         String language = playerEntry.getSafeLanguage();
         String msg = translations.translate(language, "player-switch.discord.skipped");
 
-        sendDirectMessage(discordId, msg);
+        sendDirectMessage(playerEntry, msg);
     }
 
     public void setActivity(String status) {
@@ -200,5 +213,25 @@ public class DiscordBot {
         if (listener != null) {
             listener.setSwitchManager(manager);
         }
+    }
+
+    public void removeSkipButton(PlayerEntry playerEntry) {
+        String userId = playerEntry.getDiscordId();
+        String messageId = playerEntry.getLastInteractionMessageId();
+
+        var jda = this.jda;
+
+        if (!ready || jda == null || userId.isBlank() || messageId.isBlank()) return;
+
+        try {
+            jda.retrieveUserById(userId)
+                    .queue(user -> user.openPrivateChannel()
+                            .queue(channel -> channel.retrieveMessageById(messageId)
+                                    .queue(msg -> msg.editMessageComponents().queue())));
+        } catch (Throwable t) {
+            logger.error("Failed to send discord direct message to user '{}'", userId, t);
+        }
+
+        playerEntry.setLastInteractionMessageId("");
     }
 }

@@ -71,6 +71,10 @@ public class Config {
         setTotalTicks(0);
         setTicksSinceLastSwitch(0);
         setTurnCount(1);
+
+        for (PlayerEntry entry : participants) {
+            entry.reset();
+        }
     }
 
     public Optional<PlayerEntry> getCurrentPlayerEntry() {
@@ -79,6 +83,16 @@ public class Config {
         }
 
         return Optional.ofNullable(participants.get(currentPlayer));
+    }
+
+    public Optional<PlayerEntry> getPlayerEntryByDiscordId(String discordId) {
+        if (discordId == null) {
+            return Optional.empty();
+        }
+
+        return participants.stream()
+                .filter(entry -> discordId.equals(entry.getDiscordId()))
+                .findAny();
     }
 
     public Optional<UUID> getCurrentPlayerUuid() {

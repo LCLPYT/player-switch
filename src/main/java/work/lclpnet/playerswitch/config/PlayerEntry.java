@@ -33,6 +33,10 @@ public class PlayerEntry {
     @SerdeSkipSerializingIf(SerdeSkipSerializingIf.SkipSerIf.IS_NULL)
     private String language = "";
 
+    @SerdeSkipDeserializingIf(SerdeSkipDeserializingIf.SkipDeIf.IS_MISSING)
+    @SerdeSkipSerializingIf(SerdeSkipSerializingIf.SkipSerIf.IS_NULL)
+    private String lastInteractionMessageId = "";
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -65,5 +69,9 @@ public class PlayerEntry {
         }
 
         return lang;
+    }
+
+    public void reset() {
+        lastInteractionMessageId = "";
     }
 }

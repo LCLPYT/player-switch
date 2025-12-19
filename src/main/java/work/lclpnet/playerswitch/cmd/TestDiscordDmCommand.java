@@ -39,7 +39,7 @@ public class TestDiscordDmCommand implements KibuCommand {
 
             String msg = translations.translate(language, "player-switch.discord.test_dm");
 
-            discordBot.sendDirectMessage(participant.getDiscordId(), msg);
+            discordBot.sendDirectMessage(participant, msg);
         }
 
         return 1;

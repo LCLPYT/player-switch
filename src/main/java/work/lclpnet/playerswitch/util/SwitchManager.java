@@ -283,6 +283,7 @@ public class SwitchManager {
 
         prevPlayer.ifPresent(this::disconnectPlayer);
 
+        messenger.onTurnOver(current);
         messenger.sendTurnNotification(next);
 
         logStatus(current, next);

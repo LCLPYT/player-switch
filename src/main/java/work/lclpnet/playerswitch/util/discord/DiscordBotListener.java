@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import net.dv8tion.jda.api.modals.Modal;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import work.lclpnet.kibu.config.ConfigManager;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.playerswitch.config.Config;
@@ -53,13 +54,13 @@ public class DiscordBotListener extends ListenerAdapter {
     }
 
     private void onSkipButton(ButtonInteractionEvent event) {
-        PlayerEntry playerEntry = configManager.config().getCurrentPlayerEntry().orElse(null);
+        PlayerEntry currentPlayerEntry = configManager.config().getCurrentPlayerEntry().orElse(null);
 
-        if (playerEntry == null
-                || validateIsCurrentPlayer(event, playerEntry)
-                || validateNotCurrentlyPlaying(event, playerEntry)) return;
+        if (currentPlayerEntry == null
+                || validateIsCurrentPlayer(event, currentPlayerEntry)
+                || validateNotCurrentlyPlaying(event)) return;
 
-        String lang = playerEntry.getSafeLanguage();
+        String lang = getLanguageOfDiscordUser(event.getUser().getId());
 
         String title = translations.translate(lang, "player-switch.discord.confirm_skip");
         String confirmLabel = translations.translate(lang, "player-switch.discord.confirm_label");
@@ -87,13 +88,13 @@ public class DiscordBotListener extends ListenerAdapter {
 
         String value = mapping.getAsString();
 
-        PlayerEntry playerEntry = configManager.config().getCurrentPlayerEntry().orElse(null);
+        PlayerEntry currentPlayerEntry = configManager.config().getCurrentPlayerEntry().orElse(null);
 
-        if (playerEntry == null
-                || validateIsCurrentPlayer(event, playerEntry)
-                || validateNotCurrentlyPlaying(event, playerEntry)) return;
+        if (currentPlayerEntry == null
+                || validateIsCurrentPlayer(event, currentPlayerEntry)
+                || validateNotCurrentlyPlaying(event)) return;
 
-        String lang = playerEntry.getSafeLanguage();
+        String lang = getLanguageOfDiscordUser(event.getUser().getId());
 
         if (!value.equalsIgnoreCase(CONFIRM_VALUE)) {
             String msg = translations.translate(lang, "player-switch.discord.confirm_invalid");
@@ -115,11 +116,14 @@ public class DiscordBotListener extends ListenerAdapter {
     }
 
     private boolean validateIsCurrentPlayer(IReplyCallback event, PlayerEntry playerEntry) {
-        if (playerEntry.getDiscordId().equals(event.getUser().getId())) {
+        String userId = event.getUser().getId();
+
+        if (playerEntry.getDiscordId().equals(userId)) {
             return false;
         }
 
-        String lang = playerEntry.getSafeLanguage();
+        String lang = getLanguageOfDiscordUser(userId);
+
         String msg = translations.translate(lang, "player-switch.discord.not_your_turn");
 
         event.reply(msg).queue();
@@ -127,14 +131,20 @@ public class DiscordBotListener extends ListenerAdapter {
         return true;
     }
 
-    private boolean validateNotCurrentlyPlaying(IReplyCallback event, PlayerEntry playerEntry) {
+    private @NonNull String getLanguageOfDiscordUser(String discordId) {
+        return configManager.config().getPlayerEntryByDiscordId(discordId)
+                .map(PlayerEntry::getSafeLanguage)
+                .orElse("en_us");
+    }
+
+    private boolean validateNotCurrentlyPlaying(IReplyCallback event) {
         SwitchManager switchManager = this.switchManager;
 
         if (switchManager == null) return true;
 
         if (switchManager.isNobodyPlaying()) return false;
 
-        String lang = playerEntry.getSafeLanguage();
+        String lang = getLanguageOfDiscordUser(event.getUser().getId());
         String msg = translations.translate(lang, "player-switch.discord.cannot_skip");
 
         event.reply(msg).queue();
