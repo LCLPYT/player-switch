@@ -1,8 +1,12 @@
 package work.lclpnet.playerswitch.util;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.*;
-import net.minecraft.util.Formatting;
+import net.minecraft.util.FormattedCharSink;
 import org.jetbrains.annotations.NotNull;
 import work.lclpnet.kibu.config.ConfigManager;
 import work.lclpnet.kibu.translate.Translations;
@@ -12,7 +16,7 @@ import work.lclpnet.playerswitch.type.PlayerSwitchMinecraftServer;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static net.minecraft.util.Formatting.*;
+import static net.minecraft.ChatFormatting.*;
 
 public class ServerMotd {
 
@@ -28,25 +32,25 @@ public class ServerMotd {
         this.statusTexts = statusTexts;
     }
 
-    public MutableText firstLine() {
+    public MutableComponent firstLine() {
         Config config = configManager.config();
         String language = config.getMotd().getLanguage();
 
         String totalTime = statusTexts.getTimeString(config.getTotalTicks(), language);
 
-        return Text.empty()
+        return Component.empty()
                 .append(translations.translateText(language, "player-switch.motd.subject").formatted(GREEN))
-                .append(Text.literal(" | ").formatted(DARK_GREEN, BOLD))
-                .append(Text.literal('«' + totalTime + '»').formatted(GOLD));
+                .append(Component.literal(" | ").withStyle(DARK_GREEN, BOLD))
+                .append(Component.literal('«' + totalTime + '»').withStyle(GOLD));
     }
 
-    public void setStatus(Text status) {
+    public void setStatus(Component status) {
         var msg = firstLine().append("\n").append(status);
 
         setMotd(msg);
     }
 
-    public void setMotd(Text motd) {
+    public void setMotd(Component motd) {
         String string = convertText(motd);
 
         server.setMotd(string);
@@ -54,10 +58,10 @@ public class ServerMotd {
         ((PlayerSwitchMinecraftServer) server).playerSwitch$updateMetadata();
     }
 
-    public static @NotNull String convertText(Text motd) {
+    public static @NotNull String convertText(Component motd) {
         var builder = new StringBuilder();
 
-        motd.asOrderedText().accept(new CharacterVisitor() {
+        motd.getVisualOrderText().accept(new FormattedCharSink() {
             Style lastStyle = Style.EMPTY;
 
             @Override
@@ -91,11 +95,11 @@ public class ServerMotd {
         if (style.isStrikethrough()) builder.append(STRIKETHROUGH);
     }
 
-    private static Optional<Formatting> matchColor(TextColor color) {
-        String name = color.getName();
+    private static Optional<ChatFormatting> matchColor(TextColor color) {
+        String name = color.serialize();
 
-        return Arrays.stream(Formatting.values())
-                .filter(Formatting::isColor)
+        return Arrays.stream(ChatFormatting.values())
+                .filter(ChatFormatting::isColor)
                 .filter(formatting -> name.equals(formatting.getName()))
                 .findAny();
     }

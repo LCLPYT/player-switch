@@ -3,18 +3,18 @@
   "package": "work.lclpnet.playerswitch.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "DedicatedServerMixin",
     "GameProfileMixin",
-    "MinecraftDedicatedServerMixin",
     "MinecraftServerMixin",
-    "PlayerEntityMixin",
+    "PlayerListMixin",
     "PlayerListS2CPacketEntryMixin",
-    "PlayerManagerMixin",
-    "ServerCommonNetworkHandlerAccessor",
-    "ServerCommonNetworkHandlerMixin",
-    "ServerConfigurationNetworkHandlerAccessor",
-    "ServerConfigurationNetworkHandlerMixin",
-    "ServerPlayerEntityMixin",
-    "ServerPlayNetworkHandlerMixin"
+    "PlayerMixin",
+    "ServerCommonPacketListenerImplAccessor",
+    "ServerCommonPacketListenerImplMixin",
+    "ServerConfigurationPacketListenerImplAccessor",
+    "ServerConfigurationPacketListenerImplMixin",
+    "ServerGamePacketListenerImplMixin",
+    "ServerPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

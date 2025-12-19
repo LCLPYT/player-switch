@@ -1,9 +1,9 @@
 package work.lclpnet.playerswitch.cmd;
 
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.cmd.type.KibuCommand;
 
@@ -19,15 +19,15 @@ public class ResetRunCommand implements KibuCommand {
 
     @Override
     public void register(CommandRegistrar registrar) {
-        registrar.registerCommand(CommandManager.literal("reset_run")
-                .requires(s -> s.hasPermissionLevel(4))
+        registrar.registerCommand(Commands.literal("reset_run")
+                .requires(s -> s.hasPermission(4))
                 .executes(this::resetRun));
     }
 
-    private int resetRun(CommandContext<ServerCommandSource> ctx) {
+    private int resetRun(CommandContext<CommandSourceStack> ctx) {
         resetRun.set(true);
-        ctx.getSource().sendMessage(Text.literal("Resetting the current run. The server will be stopped for this. Upon restart, a new run is automatically started."));
-        ctx.getSource().getServer().stop(false);
+        ctx.getSource().sendSystemMessage(Component.literal("Resetting the current run. The server will be stopped for this. Upon restart, a new run is automatically started."));
+        ctx.getSource().getServer().halt(false);
         return 1;
     }
 }

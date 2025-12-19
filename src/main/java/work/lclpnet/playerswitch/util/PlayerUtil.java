@@ -13,8 +13,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 
-import static net.minecraft.util.Formatting.OBFUSCATED;
-import static net.minecraft.util.Formatting.YELLOW;
+import static net.minecraft.ChatFormatting.OBFUSCATED;
+import static net.minecraft.ChatFormatting.YELLOW;
 import static work.lclpnet.kibu.translate.text.FormatWrapper.styled;
 
 public class PlayerUtil {

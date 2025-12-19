@@ -3,13 +3,13 @@ package work.lclpnet.playerswitch.util;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.PlayerConfigEntry;
-import net.minecraft.server.network.ServerCommonNetworkHandler;
-import net.minecraft.server.network.ServerConfigurationNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.server.level.ClientInformation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerCommonPacketListenerImpl;
+import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
+import net.minecraft.server.players.NameAndId;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.config.ConfigManager;
@@ -21,8 +21,8 @@ import work.lclpnet.playerswitch.PlayerSwitchInit;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.config.PlayerEntry;
 import work.lclpnet.playerswitch.hook.*;
-import work.lclpnet.playerswitch.mixin.ServerCommonNetworkHandlerAccessor;
-import work.lclpnet.playerswitch.mixin.ServerConfigurationNetworkHandlerAccessor;
+import work.lclpnet.playerswitch.mixin.ServerCommonPacketListenerImplAccessor;
+import work.lclpnet.playerswitch.mixin.ServerConfigurationPacketListenerImplAccessor;
 import work.lclpnet.playerswitch.type.GameProfileCapture;
 import work.lclpnet.playerswitch.util.msg.Messenger;
 import work.lclpnet.playerswitch.util.queue.PlayerQueue;
@@ -35,7 +35,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.Math.max;
-import static net.minecraft.util.Formatting.*;
+import static net.minecraft.ChatFormatting.*;
 
 public class SwitchManager {
 
@@ -50,7 +50,7 @@ public class SwitchManager {
     private final Logger logger;
     private final StatusTexts statusTexts;
     private final ServerMotd motd;
-    private final Map<UUID, ServerConfigurationNetworkHandler> handlers = new HashMap<>();
+    private final Map<UUID, ServerConfigurationPacketListenerImpl> handlers = new HashMap<>();
     private final PlayerQueue queue;
     private final TurnTimeout turnTimeout;
 
@@ -99,7 +99,7 @@ public class SwitchManager {
         return true;
     }
 
-    private void onJoin(ServerPlayerEntity player) {
+    private void onJoin(ServerPlayer player) {
         UUID realId = PlayerUnifier.getRealProfile(player).id();
         handlers.remove(realId);
     }
@@ -108,8 +108,8 @@ public class SwitchManager {
         return config.isHideCurrentPlayer();
     }
 
-    private void onPlayerHandlerDisconnect(ServerCommonNetworkHandler handler) {
-        var profile = ((ServerCommonNetworkHandlerAccessor) handler).invokeGetProfile();
+    private void onPlayerHandlerDisconnect(ServerCommonPacketListenerImpl handler) {
+        var profile = ((ServerCommonPacketListenerImplAccessor) handler).invokePlayerProfile();
 
         if (profile == null) return;
 
@@ -120,7 +120,7 @@ public class SwitchManager {
         handlers.remove(id);
     }
 
-    private void beforeCheckCanJoin(GameProfile profile, ServerConfigurationNetworkHandler handler) {
+    private void beforeCheckCanJoin(GameProfile profile, ServerConfigurationPacketListenerImpl handler) {
         handlers.put(profile.id(), handler);
     }
 
@@ -134,18 +134,18 @@ public class SwitchManager {
         return shouldPause;
     }
 
-    public boolean isCurrentPlayer(ServerPlayerEntity player) {
+    public boolean isCurrentPlayer(ServerPlayer player) {
         return config.getCurrentPlayerUuid()
                 .map(uuid -> uuid.equals(PlayerUnifier.getRealUuid(player)))
                 .orElse(false);
     }
 
-    private @Nullable Text checkCanJoin(SocketAddress socketAddress, PlayerConfigEntry playerEntry) {
+    private @Nullable Component checkCanJoin(SocketAddress socketAddress, NameAndId playerEntry) {
         var handler = handlers.get(playerEntry.id());
 
         if (handler == null) return null;
 
-        SyncedClientOptions syncedOptions = ((ServerConfigurationNetworkHandlerAccessor) handler).getSyncedOptions();
+        ClientInformation syncedOptions = ((ServerConfigurationPacketListenerImplAccessor) handler).getClientInformation();
         String language = syncedOptions != null ? syncedOptions.language() : "en_us";
 
         PlayerEntry entry = config.getCurrentPlayerEntry().orElse(null);
@@ -194,8 +194,8 @@ public class SwitchManager {
         }
     }
 
-    public Optional<ServerPlayerEntity> currentPlayer() {
-        return Optional.ofNullable(server.getPlayerManager().getPlayer(config.getFixedUuid()))
+    public Optional<ServerPlayer> currentPlayer() {
+        return Optional.ofNullable(server.getPlayerList().getPlayer(config.getFixedUuid()))
                 .filter(player -> PlayerUnifier.getRealUuid(player)
                         .equals(config.getCurrentPlayerUuid().orElse(null)));
     }
@@ -284,19 +284,19 @@ public class SwitchManager {
         CompletableFuture.runAsync(() -> queue.save(PlayerSwitchInit.getQueuePath()));
     }
 
-    private void disconnectPlayer(ServerPlayerEntity player) {
-        Text msg = config.getCurrentPlayerEntry()
+    private void disconnectPlayer(ServerPlayer player) {
+        Component msg = config.getCurrentPlayerEntry()
                 .flatMap(entry -> playerUtil.getUsername(entry).join())
                 .map(name -> translations.translateText(player, "player-switch.time_expired_other_user", PlayerUtil.formatUsername(name, config)).formatted(GRAY))
                 .orElseGet(() -> translations.translateText(player, "player-switch.time_expired").formatted(GRAY));
 
-        player.networkHandler.disconnect(msg);
+        player.connection.disconnect(msg);
     }
 
-    private void onPlayerDisconnect(ServerPlayerEntity player) {
+    private void onPlayerDisconnect(ServerPlayer player) {
         update();
 
-        var realProfile = GameProfileCapture.get(player.networkHandler).playerSwitch$getRealGameProfile();
+        var realProfile = GameProfileCapture.get(player.connection).playerSwitch$getRealGameProfile();
 
         handlers.remove(realProfile.id());
     }

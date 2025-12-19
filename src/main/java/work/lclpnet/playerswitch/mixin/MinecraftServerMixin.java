@@ -1,7 +1,7 @@
 package work.lclpnet.playerswitch.mixin;
 
+import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerMetadata;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -19,21 +19,21 @@ import java.util.function.BooleanSupplier;
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements PlayerSwitchMinecraftServer {
 
-    @Shadow protected abstract void runAutosave();
+    @Shadow protected abstract void autoSave();
 
-    @Shadow public abstract void tickNetworkIo();
-
-    @Shadow
-    private @Nullable ServerMetadata metadata;
+    @Shadow public abstract void tickConnection();
 
     @Shadow
-    protected abstract ServerMetadata createMetadata();
+    private @Nullable ServerStatus status;
+
+    @Shadow
+    protected abstract ServerStatus buildServerStatus();
 
     @Unique
     private boolean paused = false;
 
     @Inject(
-            method = "tick",
+            method = "tickServer",
             at = @At("HEAD"),
             cancellable = true
     )
@@ -49,17 +49,17 @@ public abstract class MinecraftServerMixin implements PlayerSwitchMinecraftServe
         if (!wasPaused) {
             PlayerSwitchInit.LOGGER.info("Pausing the server");
 
-            runAutosave();
+            autoSave();
 
             ServerPausedCallback.HOOK.invoker().onPause(self);
         }
 
-        tickNetworkIo();
+        tickConnection();
         ci.cancel();
     }
 
     @Override
     public void playerSwitch$updateMetadata() {
-        metadata = createMetadata();
+        status = buildServerStatus();
     }
 }

@@ -3,7 +3,7 @@ package work.lclpnet.playerswitch;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -83,9 +83,9 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
         new ResetRunCommand(resetRun).register(container);
 
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            levelName = server.getSaveProperties().getLevelName();
+            levelName = server.getWorldData().getLevelName();
 
-            statusTexts.setPlayerManager(server.getPlayerManager());
+            statusTexts.setPlayerManager(server.getPlayerList());
 
             var manager = new SwitchManager(configManager, playerUtil, translations, server, messenger, LOGGER, statusTexts, queue);
 
@@ -101,7 +101,7 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
             }
 
 			LOGGER.error("Shutting down server as player-switch is not configured. For more information, see https://github.com/LCLPYT/player-switch");
-			server.stop(false);
+			server.halt(false);
 		});
 
 
@@ -287,7 +287,7 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 	 * @param path The path.
 	 * @return An identifier of this mod with the given path.
 	 */
-	public static Identifier identifier(String path) {
-		return Identifier.of(MOD_ID, path);
+	public static ResourceLocation identifier(String path) {
+		return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
 	}
 }

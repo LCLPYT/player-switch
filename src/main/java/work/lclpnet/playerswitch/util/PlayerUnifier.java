@@ -1,8 +1,8 @@
 package work.lclpnet.playerswitch.util;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.hook.GameProfileModificationCallback;
@@ -35,16 +35,16 @@ public class PlayerUnifier {
         return unified;
     }
 
-    public static UUID getRealUuid(ServerPlayerEntity player) {
-        return getRealProfile(player.networkHandler).id();
+    public static UUID getRealUuid(ServerPlayer player) {
+        return getRealProfile(player.connection).id();
     }
 
-    public static GameProfile getRealProfile(ServerPlayNetworkHandler networkHandler) {
+    public static GameProfile getRealProfile(ServerGamePacketListenerImpl networkHandler) {
         return GameProfileCapture.get(networkHandler).playerSwitch$getRealGameProfile();
     }
 
-    public static GameProfile getRealProfile(ServerPlayerEntity player) {
-        return getRealProfile(player.networkHandler);
+    public static GameProfile getRealProfile(ServerPlayer player) {
+        return getRealProfile(player.connection);
     }
 
     public static GameProfile getRealProfile(GameProfile profile) {

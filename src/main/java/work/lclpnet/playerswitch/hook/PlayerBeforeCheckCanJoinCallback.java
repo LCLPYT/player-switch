@@ -1,7 +1,7 @@
 package work.lclpnet.playerswitch.hook;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.server.network.ServerConfigurationNetworkHandler;
+import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
 import work.lclpnet.kibu.hook.Hook;
 import work.lclpnet.kibu.hook.HookFactory;
 
@@ -13,5 +13,5 @@ public interface PlayerBeforeCheckCanJoinCallback {
         }
     });
 
-    void beforeCheckCanJoin(GameProfile profile, ServerConfigurationNetworkHandler handler);
+    void beforeCheckCanJoin(GameProfile profile, ServerConfigurationPacketListenerImpl handler);
 }

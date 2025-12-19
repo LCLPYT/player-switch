@@ -1,14 +1,14 @@
 package work.lclpnet.playerswitch.mixin;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.message.MessageType;
-import net.minecraft.network.message.SignedMessage;
+import net.minecraft.network.Connection;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ConnectedClientData;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,12 +22,12 @@ import work.lclpnet.playerswitch.type.PlayerSwitchGameProfile;
 
 import java.util.UUID;
 
-@Mixin(ServerPlayNetworkHandler.class)
-public abstract class ServerPlayNetworkHandlerMixin implements GameProfileCapture {
+@Mixin(ServerGamePacketListenerImpl.class)
+public abstract class ServerGamePacketListenerImplMixin implements GameProfileCapture {
 
-    @Shadow public ServerPlayerEntity player;
+    @Shadow public ServerPlayer player;
 
-    @Shadow public abstract void sendProfilelessChatMessage(Text message, MessageType.Parameters params);
+    @Shadow public abstract void sendDisguisedChatMessage(Component message, ChatType.Bound params);
 
     @Unique
     private GameProfile realGameProfile;
@@ -41,10 +41,10 @@ public abstract class ServerPlayNetworkHandlerMixin implements GameProfileCaptur
             method = "<init>",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/network/message/MessageChain$Unpacker;unsigned(Ljava/util/UUID;Ljava/util/function/BooleanSupplier;)Lnet/minecraft/network/message/MessageChain$Unpacker;"
+                    target = "Lnet/minecraft/network/chat/SignedMessageChain$Decoder;unsigned(Ljava/util/UUID;Ljava/util/function/BooleanSupplier;)Lnet/minecraft/network/chat/SignedMessageChain$Decoder;"
             )
     )
-    public void setOriginalGameProfile(MinecraftServer server, ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo ci) {
+    public void setOriginalGameProfile(MinecraftServer server, Connection connection, ServerPlayer player, CommonListenerCookie clientData, CallbackInfo ci) {
         realGameProfile = PlayerSwitchGameProfile.get(player.getGameProfile()).playerSwitch$getRealGameProfile();
     }
 
@@ -54,10 +54,10 @@ public abstract class ServerPlayNetworkHandlerMixin implements GameProfileCaptur
     }
 
     @ModifyArg(
-            method = "onPlayerSession",
+            method = "handleChatSessionUpdate",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/network/encryption/PublicPlayerSession$Serialized;toSession(Lcom/mojang/authlib/GameProfile;Lnet/minecraft/network/encryption/SignatureVerifier;)Lnet/minecraft/network/encryption/PublicPlayerSession;"
+                    target = "Lnet/minecraft/network/chat/RemoteChatSession$Data;validate(Lcom/mojang/authlib/GameProfile;Lnet/minecraft/util/SignatureValidator;)Lnet/minecraft/network/chat/RemoteChatSession;"
             )
     )
     public GameProfile useRealGameProfileForSession(GameProfile gameProfile) {
@@ -68,7 +68,7 @@ public abstract class ServerPlayNetworkHandlerMixin implements GameProfileCaptur
             method = "<init>",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/network/message/MessageChain$Unpacker;unsigned(Ljava/util/UUID;Ljava/util/function/BooleanSupplier;)Lnet/minecraft/network/message/MessageChain$Unpacker;"
+                    target = "Lnet/minecraft/network/chat/SignedMessageChain$Decoder;unsigned(Ljava/util/UUID;Ljava/util/function/BooleanSupplier;)Lnet/minecraft/network/chat/SignedMessageChain$Decoder;"
             )
     )
     public UUID useRealUuidForSigning(UUID sender) {
@@ -76,10 +76,10 @@ public abstract class ServerPlayNetworkHandlerMixin implements GameProfileCaptur
     }
 
     @ModifyArg(
-            method = "setSession",
+            method = "resetPlayerChatState",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/network/encryption/PublicPlayerSession;createUnpacker(Ljava/util/UUID;)Lnet/minecraft/network/message/MessageChain$Unpacker;"
+                    target = "Lnet/minecraft/network/chat/RemoteChatSession;createMessageDecoder(Ljava/util/UUID;)Lnet/minecraft/network/chat/SignedMessageChain$Decoder;"
             )
     )
     public UUID useRealUuidForUnpacker(UUID sender) {
@@ -87,13 +87,13 @@ public abstract class ServerPlayNetworkHandlerMixin implements GameProfileCaptur
     }
 
     @Inject(
-            method = "sendChatMessage",
+            method = "sendPlayerChatMessage",
             at = @At("HEAD"),
             cancellable = true
     )
 
-    public void sendOnlyUnsignedChatMessages(SignedMessage message, MessageType.Parameters params, CallbackInfo ci) {
+    public void sendOnlyUnsignedChatMessages(PlayerChatMessage message, ChatType.Bound params, CallbackInfo ci) {
         ci.cancel();
-        sendProfilelessChatMessage(message.getContent(), params);
+        sendDisguisedChatMessage(message.decoratedContent(), params);
     }
 }

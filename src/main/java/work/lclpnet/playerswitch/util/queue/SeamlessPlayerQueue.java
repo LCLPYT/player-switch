@@ -2,7 +2,7 @@ package work.lclpnet.playerswitch.util.queue;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import net.minecraft.util.Uuids;
+import net.minecraft.core.UUIDUtil;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import work.lclpnet.gaco.ds.queue.JsonFileQueuePersistence;
@@ -35,7 +35,7 @@ public class SeamlessPlayerQueue implements PlayerQueue {
         var byUuid = playerEntries.stream()
                 .collect(Collectors.toMap(PlayerEntry::getUuid, Function.identity()));
 
-        codec = Uuids.CODEC.comapFlatMap(
+        codec = UUIDUtil.AUTHLIB_CODEC.comapFlatMap(
                 uuid -> {
                     PlayerEntry entry = byUuid.get(uuid);
 

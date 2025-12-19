@@ -1,6 +1,6 @@
 package work.lclpnet.playerswitch.mixin;
 
-import net.minecraft.server.dedicated.MinecraftDedicatedServer;
+import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -8,11 +8,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import work.lclpnet.playerswitch.hook.HideOnlinePlayersCallback;
 import work.lclpnet.playerswitch.hook.ServerMaxPlayersCallback;
 
-@Mixin(MinecraftDedicatedServer.class)
-public class MinecraftDedicatedServerMixin {
+@Mixin(DedicatedServer.class)
+public class DedicatedServerMixin {
 
     @Inject(
-            method = "getMaxPlayerCount",
+            method = "getMaxPlayers",
             at = @At("RETURN"),
             cancellable = true
     )
@@ -26,7 +26,7 @@ public class MinecraftDedicatedServerMixin {
     }
 
     @Inject(
-            method = "hideOnlinePlayers",
+            method = "hidesOnlinePlayers",
             at = @At("RETURN"),
             cancellable = true
     )

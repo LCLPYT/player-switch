@@ -1,6 +1,6 @@
 package work.lclpnet.playerswitch.hook;
 
-import net.minecraft.server.network.ServerCommonNetworkHandler;
+import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import work.lclpnet.kibu.hook.Hook;
 import work.lclpnet.kibu.hook.HookFactory;
 
@@ -12,5 +12,5 @@ public interface PlayerHandlerDisconnectCallback {
         }
     });
 
-    void onDisconnect(ServerCommonNetworkHandler handler);
+    void onDisconnect(ServerCommonPacketListenerImpl handler);
 }
