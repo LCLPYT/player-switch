@@ -15,10 +15,10 @@ public class ServerPlayerMixin {
     @Shadow public ServerGamePacketListenerImpl connection;
 
     @ModifyArg(
-            method = "getPermissionLevel",
+            method = "permissions",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/MinecraftServer;getProfilePermissions(Lnet/minecraft/server/players/NameAndId;)I"
+                    target = "Lnet/minecraft/server/MinecraftServer;getProfilePermissions(Lnet/minecraft/server/players/NameAndId;)Lnet/minecraft/server/permissions/LevelBasedPermissionSet;"
             )
     )
     public NameAndId useRealGameProfileForPermissions(NameAndId player) {

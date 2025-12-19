@@ -35,7 +35,7 @@ public class PlayerListMixin {
             method = "sendPlayerPermissionLevel(Lnet/minecraft/server/level/ServerPlayer;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/MinecraftServer;getProfilePermissions(Lnet/minecraft/server/players/NameAndId;)I"
+                    target = "Lnet/minecraft/server/MinecraftServer;getProfilePermissions(Lnet/minecraft/server/players/NameAndId;)Lnet/minecraft/server/permissions/LevelBasedPermissionSet;"
             )
     )
     public NameAndId useRealGameProfileForPermissions(NameAndId playerEntry, @Local(argsOnly = true) ServerPlayer player) {

@@ -19,7 +19,7 @@ public class SkipCommand implements KibuCommand {
     @Override
     public void register(CommandRegistrar registrar) {
         registrar.registerCommand(Commands.literal("skip")
-                .requires(s -> s.hasPermission(4))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .executes(this::skip));
     }
 

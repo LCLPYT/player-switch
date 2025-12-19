@@ -20,7 +20,7 @@ public class ResetRunCommand implements KibuCommand {
     @Override
     public void register(CommandRegistrar registrar) {
         registrar.registerCommand(Commands.literal("reset_run")
-                .requires(s -> s.hasPermission(4))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .executes(this::resetRun));
     }
 

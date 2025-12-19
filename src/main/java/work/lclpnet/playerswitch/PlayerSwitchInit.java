@@ -3,7 +3,7 @@ package work.lclpnet.playerswitch;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -287,7 +287,7 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 	 * @param path The path.
 	 * @return An identifier of this mod with the given path.
 	 */
-	public static ResourceLocation identifier(String path) {
-		return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+	public static Identifier identifier(String path) {
+		return Identifier.fromNamespaceAndPath(MOD_ID, path);
 	}
 }

@@ -27,7 +27,7 @@ public class TestDiscordDmCommand implements KibuCommand {
     @Override
     public void register(CommandRegistrar commandRegistrar) {
         commandRegistrar.registerCommand(Commands.literal("test_discord_bot")
-                .requires(s -> s.hasPermission(4))
+                .requires(Commands.hasPermission(Commands.LEVEL_OWNERS))
                 .executes(this::testDiscordCommand));
     }
 
