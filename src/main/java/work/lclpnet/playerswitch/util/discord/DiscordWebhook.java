@@ -1,4 +1,4 @@
-package work.lclpnet.playerswitch.util;
+package work.lclpnet.playerswitch.util.discord;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -8,6 +8,7 @@ import work.lclpnet.kibu.config.ConfigManager;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.config.PlayerEntry;
+import work.lclpnet.playerswitch.util.PlayerUtil;
 
 import java.io.IOException;
 import java.net.URI;

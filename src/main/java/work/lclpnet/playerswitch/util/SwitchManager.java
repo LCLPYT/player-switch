@@ -125,13 +125,19 @@ public class SwitchManager {
     }
 
     private boolean shouldPause(MinecraftServer s) {
-        boolean shouldPause = PlayerLookup.all(s).isEmpty() || PlayerLookup.all(s).stream().noneMatch(this::isCurrentPlayer);
+        boolean shouldPause = isNobodyPlaying();
 
         if (shouldPause) {
             turnTimeout.tick();
         }
 
         return shouldPause;
+    }
+
+    public boolean isNobodyPlaying() {
+        var online = PlayerLookup.all(server);
+
+        return online.isEmpty() || online.stream().noneMatch(this::isCurrentPlayer);
     }
 
     public boolean isCurrentPlayer(ServerPlayer player) {
@@ -218,6 +224,10 @@ public class SwitchManager {
     }
 
     public void skipPlayer() {
+        skipPlayer(true);
+    }
+
+    public void skipPlayer(boolean notify) {
         int currentPlayer = config.getCurrentPlayer();
 
         var participants = config.getParticipants();
@@ -226,6 +236,10 @@ public class SwitchManager {
 
         if (currentPlayer >= 0 && currentPlayer < participants.size()) {
             PlayerEntry current = participants.get(currentPlayer);
+
+            if (notify) {
+                messenger.sendSkipNotification(current);
+            }
 
             logger.info("Skipping player {}'s turn", current.getName());
         } else {

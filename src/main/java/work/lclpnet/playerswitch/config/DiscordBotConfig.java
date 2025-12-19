@@ -18,4 +18,7 @@ public class DiscordBotConfig {
 
     @SerdeComment("Language for general messages, such as activity status")
     private String language = "en_us";
+
+    @SerdeComment("Adds a button to the turn notification in the DMs that can be used to skip the players own turn")
+    private boolean skipButton = true;
 }

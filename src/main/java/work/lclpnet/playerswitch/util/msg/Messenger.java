@@ -1,8 +1,8 @@
 package work.lclpnet.playerswitch.util.msg;
 
 import work.lclpnet.playerswitch.config.PlayerEntry;
-import work.lclpnet.playerswitch.util.DiscordBot;
-import work.lclpnet.playerswitch.util.DiscordWebhook;
+import work.lclpnet.playerswitch.util.discord.DiscordBot;
+import work.lclpnet.playerswitch.util.discord.DiscordWebhook;
 
 public class Messenger {
 
@@ -21,5 +21,9 @@ public class Messenger {
 
     public void updateStatus() {
         discordBot.updateActivityStatus();
+    }
+
+    public void sendSkipNotification(PlayerEntry playerEntry) {
+        discordBot.sendSkipNotification(playerEntry);
     }
 }

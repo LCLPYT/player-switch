@@ -10,7 +10,7 @@ import work.lclpnet.kibu.config.ConfigManager;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.config.PlayerEntry;
-import work.lclpnet.playerswitch.util.DiscordBot;
+import work.lclpnet.playerswitch.util.discord.DiscordBot;
 
 public class TestDiscordDmCommand implements KibuCommand {
 
@@ -35,11 +35,7 @@ public class TestDiscordDmCommand implements KibuCommand {
         ctx.getSource().sendSystemMessage(Component.literal("Sending participation messages to all participants with discord ids via Discord direct messages..."));
 
         for (PlayerEntry participant : configManager.config().getParticipants()) {
-            String language = participant.getLanguage();
-
-            if (language.isBlank()) {
-                language = "en_us";
-            }
+            String language = participant.getSafeLanguage();
 
             String msg = translations.translate(language, "player-switch.discord.test_dm");
 

@@ -56,4 +56,14 @@ public class PlayerEntry {
                 ", displayName='" + displayName + '\'' +
                 '}';
     }
+
+    public String getSafeLanguage() {
+        String lang = language;
+
+        if (lang.isBlank()) {
+            return "en_us";
+        }
+
+        return lang;
+    }
 }

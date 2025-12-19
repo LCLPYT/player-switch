@@ -21,9 +21,9 @@
     "player-switch.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.18.1",
-    "minecraft": "~1.21.10",
-    "java": ">=21",
+    "fabricloader": ">=${loader_version}",
+    "minecraft": "~${minecraft_compat}",
+    "java": ">=${java_version}",
     "fabric-api": "*",
     "kibu": ">=0.153.0",
     "gaco": ">=0.14.2"

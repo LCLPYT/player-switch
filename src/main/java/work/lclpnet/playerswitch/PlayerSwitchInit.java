@@ -24,6 +24,8 @@ import work.lclpnet.playerswitch.config.ConfigValidator;
 import work.lclpnet.playerswitch.config.PlayerEntry;
 import work.lclpnet.playerswitch.hook.CodeOfConductCallback;
 import work.lclpnet.playerswitch.util.*;
+import work.lclpnet.playerswitch.util.discord.DiscordBot;
+import work.lclpnet.playerswitch.util.discord.DiscordWebhook;
 import work.lclpnet.playerswitch.util.msg.Messenger;
 import work.lclpnet.playerswitch.util.queue.PlayerQueue;
 import work.lclpnet.playerswitch.util.queue.RepeatingPlayerQueue;
@@ -91,18 +93,19 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
             boolean setupSuccess = manager.setup(scheduler, hooks);
 
-			if (setupSuccess) {
-                new SkipCommand(manager).register(container);
-
-                discordBot.updateActivityStatus();
-
-                logStatus(configManager, playerUtil);
+            if (!setupSuccess) {
+                LOGGER.error("Shutting down server as player-switch is not configured. For more information, see https://github.com/LCLPYT/player-switch");
+                server.halt(false);
                 return;
             }
 
-			LOGGER.error("Shutting down server as player-switch is not configured. For more information, see https://github.com/LCLPYT/player-switch");
-			server.halt(false);
-		});
+            new SkipCommand(manager).register(container);
+
+            discordBot.setSwitchManager(manager);
+            discordBot.updateActivityStatus();
+
+            logStatus(configManager, playerUtil);
+        });
 
 
         handleCodeOfConduct(configManager);
