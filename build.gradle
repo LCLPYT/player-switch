@@ -72,6 +72,9 @@ dependencies {
     include(implementation("net.sf.trove4j:core:3.1.0"))
     include(implementation("com.squareup.okio:okio:3.16.2"))
     include(implementation("org.apache.commons:commons-collections4:4.5.0"))
+    include(implementation("com.fasterxml.jackson.core:jackson-core:2.20.1"))
+    include(implementation("com.fasterxml.jackson.core:jackson-databind:2.20.1"))
+    include(implementation("com.fasterxml.jackson.core:jackson-annotations:2.20"))
 
     testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
 }

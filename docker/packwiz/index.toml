@@ -17,12 +17,12 @@ metafile = true
 
 [[files]]
 file = "mods/gaco.pw.toml"
-hash = "16993b9feaccaa7aa603d1dc1380caec99d33bc8eaf586f72c4daf0a2de28b88"
+hash = "208432b6092d595c460d9f25e7228dd138a7e1d399663f683a25b3226a718a3d"
 metafile = true
 
 [[files]]
 file = "mods/kibu.pw.toml"
-hash = "8b1db9720e185028adcd205cba93bbc43e482c9c07402734aac4e7d81aab6961"
+hash = "63557685fceed07d0460cf718f0ed428328fd7ca597de651f2c6958561c58de5"
 metafile = true
 
 [[files]]
