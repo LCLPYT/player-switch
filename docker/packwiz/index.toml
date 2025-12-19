@@ -2,17 +2,17 @@ hash-format = "sha256"
 
 [[files]]
 file = "mods/anti-xray.pw.toml"
-hash = "e1dc1bb8a3537b9c5b41cbc6fa97f19729d6c9ab602810da0b192c5fc84eba7e"
+hash = "7ffd2cbb973d987d543b36f12cc9362baae07b0983b83a8292f063ed4287f9a9"
 metafile = true
 
 [[files]]
 file = "mods/fabric-api.pw.toml"
-hash = "cbda4f1881cfb9f054395a3db225df4202d1f2e7bd0ed27d803b837fcf728621"
+hash = "816a274a51586b2a1e328b70fef8aba88c8e0c64205bebb2773cde8bc205f20f"
 metafile = true
 
 [[files]]
 file = "mods/fabric-language-kotlin.pw.toml"
-hash = "d7c055f277c1751122d9abc5f09015e629699e04a9383cd0c666b33436293079"
+hash = "61afd7af5c645ffd966b2bd86be944eacd1e48a8044e8f67082225d4d9989f0c"
 metafile = true
 
 [[files]]
@@ -26,11 +26,6 @@ hash = "8b1db9720e185028adcd205cba93bbc43e482c9c07402734aac4e7d81aab6961"
 metafile = true
 
 [[files]]
-file = "mods/krypton.pw.toml"
-hash = "8f6e0157b42ba668c0ba9aa7eff94b3b91a8f58bcd357e574d70a7b160d4337c"
-metafile = true
-
-[[files]]
 file = "mods/lithium.pw.toml"
-hash = "84957275e9dc6f07f4244ce3303536e3d73b0e72eb1696ccd024168a52c29c98"
+hash = "88a36b21d538d44aca7dd0a7e5ad8c09b1b263be3f4381e3bb22bc9f94ee7290"
 metafile = true

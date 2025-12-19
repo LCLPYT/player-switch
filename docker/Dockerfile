@@ -1,6 +1,6 @@
 FROM eclipse-temurin:21-jdk-alpine AS builder
 
-ARG mc_version=1.21.10
+ARG mc_version=1.21.11
 
 RUN apk add --no-cache --update curl go && \
     go install github.com/packwiz/packwiz@latest
