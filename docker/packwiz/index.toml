@@ -2,30 +2,35 @@ hash-format = "sha256"
 
 [[files]]
 file = "mods/anti-xray.pw.toml"
-hash = "7ffd2cbb973d987d543b36f12cc9362baae07b0983b83a8292f063ed4287f9a9"
+hash = "9ac9e07e382f0a12c9a88f6c7b51444aba293011cfae81b71636183eca090368"
 metafile = true
 
 [[files]]
 file = "mods/fabric-api.pw.toml"
-hash = "816a274a51586b2a1e328b70fef8aba88c8e0c64205bebb2773cde8bc205f20f"
+hash = "6b342a83e9736f0832e750c8d631273cf600305d73b32c8bd6a977811f6972ee"
 metafile = true
 
 [[files]]
 file = "mods/fabric-language-kotlin.pw.toml"
-hash = "61afd7af5c645ffd966b2bd86be944eacd1e48a8044e8f67082225d4d9989f0c"
+hash = "7a7f5673b6e33eebaed00c0c453fc41d11c7474eb320c3ce8736d415fcfe2682"
 metafile = true
 
 [[files]]
 file = "mods/gaco.pw.toml"
-hash = "208432b6092d595c460d9f25e7228dd138a7e1d399663f683a25b3226a718a3d"
+hash = "139d75070c0487b92be635949fed3c43e082bbf3ca88092012fe646e3bb2b73b"
 metafile = true
 
 [[files]]
 file = "mods/kibu.pw.toml"
-hash = "63557685fceed07d0460cf718f0ed428328fd7ca597de651f2c6958561c58de5"
+hash = "d55d258b7bcd5d0d8658911a5b1a9b7bfaf3cd705c14dd1fd3a9e170150e42ef"
+metafile = true
+
+[[files]]
+file = "mods/krypton.pw.toml"
+hash = "4d8432eed6984a86acf6c9f056755b3f9082eb8fcb5b3f37e96498e7871e40c9"
 metafile = true
 
 [[files]]
 file = "mods/lithium.pw.toml"
-hash = "88a36b21d538d44aca7dd0a7e5ad8c09b1b263be3f4381e3bb22bc9f94ee7290"
+hash = "d68f9ad500e062c1e3b59f25bf72416e579d18d836b104f2712464298932eca7"
 metafile = true

@@ -142,7 +142,8 @@ You can simplify the process by creating a `docker-compose.yml` in a directory o
 ```yaml
 services:
   server:
-    image: ghcr.io/lclpyt/player-switch:1.21.8-latest
+    image: ghcr.io/lclpyt/player-switch:26.3-latest
+    stop_grace_period: 60s
     stdin_open: true
     tty: true
     ports:
@@ -153,6 +154,9 @@ services:
     volumes:
       - ./run:/data
 ```
+
+The server runs as user `1000:1000` inside the container, so make sure the `run` directory is writable by that user
+(e.g. `mkdir run && sudo chown 1000:1000 run`).
 
 You can then use the docker compose commands listed below.
 
@@ -166,10 +170,10 @@ Alternatively, you can use docker directly:
 # this will build from source, but you can also skip this step and use ghcr.io/lclpyt/player-switch:latest as image instead
 docker build -f docker/Dockerfile -t player-switch .
 
-mkdir -p run/{config,world}
+mkdir -p run && sudo chown 1000:1000 run
 docker run \
     --mount type=bind,src="$(pwd)/run,dst=/data" \
-    --rm -p 25565:25565 -d -e EULA=true --name=player-switch player-switch
+    --rm -it -p 25565:25565 -d -e EULA=true --name=player-switch player-switch
 ```
 
 Please notice that by passing `EULA=true`, or starting via docker compose, you accept the [Minecraft EULA](https://aka.ms/MinecraftEULA).
@@ -177,6 +181,7 @@ Please notice that by passing `EULA=true`, or starting via docker compose, you a
 ### Accessing the configuration
 You can access all configuration in the `run/config` directory on the host system.
 Specifically, you need to edit `run/config/player-switch/config.toml` initially to configure the participants etc.
+The `docker-compose.yml` in this repository uses a named volume instead, which you can access via `docker compose exec server bash`.
 
 ### Stopping the server
 ```

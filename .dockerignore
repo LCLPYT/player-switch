@@ -1,6 +1,7 @@
+.gradle
+.idea
+build
+logs
+mods
+run
 docker/packwiz/*.mrpack
-run/
-logs/
-.idea/
-.gradle/
-build/
