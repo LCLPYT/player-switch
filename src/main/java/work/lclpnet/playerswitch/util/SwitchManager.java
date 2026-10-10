@@ -157,7 +157,7 @@ public class SwitchManager {
         PlayerEntry entry = config.getCurrentPlayerEntry().orElse(null);
 
         if (entry == null) {
-            return translations.translateText(language, "player-switch.not_configured").formatted(RED);
+            return translations.translateText(language, "player-switch.not_configured").withStyle(RED);
         }
 
         if (entry.getUuid().equals(playerEntry.id())) {
@@ -165,16 +165,16 @@ public class SwitchManager {
                 return null;
             }
 
-            return translations.translateText(language, "player-switch.other_online").formatted(YELLOW);
+            return translations.translateText(language, "player-switch.other_online").withStyle(YELLOW);
         }
 
         if (config.getParticipants().stream().noneMatch(pe -> playerEntry.id().equals(pe.getUuid()))) {
-            return translations.translateText(language, "player-switch.not_participating").formatted(RED);
+            return translations.translateText(language, "player-switch.not_participating").withStyle(RED);
         }
 
         return playerUtil.getUsername(entry).join()
-                .map(name -> translations.translateText(language, "player-switch.other_user_turn", PlayerUtil.formatUsername(name, config)).formatted(RED))
-                .orElseGet(() -> translations.translateText(language, "player-switch.not_your_turn").formatted(RED));
+                .map(name -> translations.translateText(language, "player-switch.other_user_turn", PlayerUtil.formatUsername(name, config)).withStyle(RED))
+                .orElseGet(() -> translations.translateText(language, "player-switch.not_your_turn").withStyle(RED));
     }
 
     private void tick() {
@@ -188,7 +188,7 @@ public class SwitchManager {
 
         if (config.getParticipants().size() > 1) {
             currentPlayer().ifPresent(player ->
-                    TimeHelper.formatTime(translations, ticksLeft).formatted(AQUA).sendTo(player, true));
+                    TimeHelper.formatTime(translations, ticksLeft).withStyle(AQUA).sendTo(player, true));
         }
 
         config.setElapsedTicks(ticks + 1);
@@ -302,8 +302,8 @@ public class SwitchManager {
     private void disconnectPlayer(ServerPlayer player) {
         Component msg = config.getCurrentPlayerEntry()
                 .flatMap(entry -> playerUtil.getUsername(entry).join())
-                .map(name -> translations.translateText(player, "player-switch.time_expired_other_user", PlayerUtil.formatUsername(name, config)).formatted(GRAY))
-                .orElseGet(() -> translations.translateText(player, "player-switch.time_expired").formatted(GRAY));
+                .map(name -> translations.translateText(player, "player-switch.time_expired_other_user", PlayerUtil.formatUsername(name, config)).withStyle(GRAY))
+                .orElseGet(() -> translations.translateText(player, "player-switch.time_expired").withStyle(GRAY));
 
         player.connection.disconnect(msg);
     }

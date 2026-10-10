@@ -39,7 +39,7 @@ public class ServerMotd {
         String totalTime = statusTexts.getTimeString(config.getTotalTicks(), language);
 
         return Component.empty()
-                .append(translations.translateText(language, "player-switch.motd.subject").formatted(GREEN))
+                .append(translations.translateText(language, "player-switch.motd.subject").withStyle(GREEN))
                 .append(Component.literal(" | ").withStyle(DARK_GREEN, BOLD))
                 .append(Component.literal('«' + totalTime + '»').withStyle(GOLD));
     }
@@ -99,8 +99,10 @@ public class ServerMotd {
         String name = color.serialize();
 
         return Arrays.stream(ChatFormatting.values())
-                .filter(ChatFormatting::isColor)
-                .filter(formatting -> name.equals(formatting.getName()))
+                .filter(formatting -> {
+                    TextColor legacy = TextColor.fromLegacyFormat(formatting);
+                    return legacy != null && name.equals(legacy.serialize());
+                })
                 .findAny();
     }
 }

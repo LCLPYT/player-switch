@@ -1,8 +1,8 @@
 plugins {
-	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 	id 'gradle-build-utils' version '1.7.0'
-    id 'io.freefair.lombok' version '8.11'
+    id 'io.freefair.lombok' version '9.4.0'
 }
 
 Properties props = buildUtils.loadProperties('publish.properties')  // will be empty, if the file is missing
@@ -51,12 +51,11 @@ loom {
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings loom.officialMojangMappings()
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modImplementation "work.lclpnet.mods.kibu:kibu:${project.kibu_version}"
-    modImplementation("work.lclpnet.mods.gaco:gaco:${project.gaco_version}")
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    implementation "work.lclpnet.mods.kibu:kibu:${project.kibu_version}"
+    implementation("work.lclpnet.mods.gaco:gaco:${project.gaco_version}")
 
     include(implementation('com.electronwill.night-config:core:3.8.1'))
     include(implementation('com.electronwill.night-config:toml:3.8.1'))
@@ -102,8 +101,11 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 java {
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
     withSourcesJar()
+
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(javaVersion)
+    }
 
     sourceCompatibility = JavaVersion.toVersion(javaVersion)
     targetCompatibility = JavaVersion.toVersion(javaVersion)

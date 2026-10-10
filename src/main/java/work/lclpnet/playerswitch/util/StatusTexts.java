@@ -51,7 +51,7 @@ public class StatusTexts {
 
         RootText secondLine = translations.translateText(
                 language, "player-switch.motd.now_playing", PlayerUtil.formatUsername(username, config)
-        ).formatted(AQUA);
+        ).withStyle(AQUA);
 
         if (config.getParticipants().size() > 1) {
             return secondLine.append(Component.literal(" (").withStyle(AQUA)
@@ -69,7 +69,7 @@ public class StatusTexts {
 
         return translations.translateText(
                 language, "player-switch.motd.waiting", PlayerUtil.formatUsername(username, configManager.config())
-        ).formatted(GRAY, ITALIC);
+        ).withStyle(GRAY, ITALIC);
     }
 
     public Component noParticipants() {
