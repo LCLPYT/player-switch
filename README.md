@@ -33,6 +33,10 @@ Only one player can play the game at a time.
     #It's also useful when multiple people play with the same account.
     displayName = "Markus"
 
+    #The language to use for Discord direct messages sent to this participant by the Discord bot.
+    #If unset, "en_us" will be used.
+    language = "en_us"
+
 #-----------------------------------------------------
 #Additional configuration (optional)
 #-----------------------------------------------------
@@ -60,6 +64,13 @@ ticksSinceLastSwitch = 0
 
 #Turn count. Increments with every player switch
 turnCount = 1
+
+#Total challenge time, in ticks
+totalTicks = 0
+
+#Whether to hide the current player from others.
+#If enabled, the username is obfuscated in status texts and Discord webhook notifications are disabled.
+hideCurrentPlayer = false
 
 #This username will be assigned to every player
 fixedUsername = "Player"
@@ -95,6 +106,9 @@ German text to show...
 #A Discord webhook can be configured so that notifications about new turns are sent to a Discord channel. 
 #Participants that have a Discord user ID defined will also be pinged when it's their turn.
 [discordWebhook]
+    #Whether to enable the Discord webhook integration
+    enabled = true
+
     #The Discord webhook url. Can be retrieved by creating a Webhook in the "Integration" tab of the server settings.
     url = ""
 
@@ -114,6 +128,10 @@ German text to show...
 
     #Language for general messages, such as activity status
     language = "en_us"
+
+    #The time in seconds after which a reminder about the current turn will be sent.
+    #Will be clamped to at least 60 seconds. Set to -1 to disable reminders.
+    turnReminderSeconds = 129600
 ```
 
 ## Troubleshooting
