@@ -99,6 +99,11 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
                 return;
             }
 
+            if (server.isUsingWhitelist()) {
+                LOGGER.info("Server has whitelist enabled, disabling it as player switch manages connections...");
+                server.setUsingWhitelist(false);
+            }
+
             new SkipCommand(manager).register(container);
 
             discordBot.setSwitchManager(manager);

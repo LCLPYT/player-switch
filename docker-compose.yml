@@ -15,5 +15,7 @@ services:
     volumes:
       - data:/data
 
-volumes:
-  data:
+# uncomment for use with podman (remove upper volumes def)
+#    userns_mode: keep-id
+#    volumes:
+#      - ./data:/data
