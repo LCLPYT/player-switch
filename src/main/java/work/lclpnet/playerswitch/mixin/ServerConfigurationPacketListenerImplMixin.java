@@ -3,7 +3,10 @@ package work.lclpnet.playerswitch.mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.network.protocol.PacketUtils;
+import net.minecraft.network.protocol.configuration.ServerboundAcceptCodeOfConductPacket;
 import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.network.ConfigurationTask;
@@ -47,6 +50,18 @@ public class ServerConfigurationPacketListenerImplMixin {
     public GameProfile modifyGameProfile(CommonListenerCookie instance, Operation<GameProfile> original) {
         GameProfile real = original.call(instance);
         return GameProfileModificationCallback.HOOK.invoker().modifyGameProfile(real);
+    }
+
+    // vanilla finishes the code of conduct task on the network thread, which starts the spawn preparation off-thread
+    @Inject(
+            method = "handleAcceptCodeOfConduct",
+            at = @At("HEAD")
+    )
+    public void ensureCodeOfConductHandledOnServerThread(ServerboundAcceptCodeOfConductPacket packet, CallbackInfo ci) {
+        var self = (ServerConfigurationPacketListenerImpl) (Object) this;
+        MinecraftServer server = ((ServerCommonPacketListenerImplAccessor) self).getServer();
+
+        PacketUtils.ensureRunningOnSameThread(packet, self, server.packetProcessor());
     }
 
     @Inject(
