@@ -113,7 +113,7 @@ public class SwitchManager {
 
         if (profile == null) return;
 
-        UUID id = profile.id();
+        UUID id = PlayerUnifier.getRealProfile(profile).id();
 
         if (id == null) return;
 
@@ -138,6 +138,24 @@ public class SwitchManager {
         var online = PlayerLookup.all(server);
 
         return online.isEmpty() || online.stream().noneMatch(this::isCurrentPlayer);
+    }
+
+    public CompletableFuture<Boolean> isNobodyPlayingSafe() {
+        return CompletableFuture.supplyAsync(this::isNobodyPlaying, server);
+    }
+
+    public CompletableFuture<Boolean> skipIfNobodyPlaying() {
+        return CompletableFuture.supplyAsync(() -> {
+            if (!isNobodyPlaying()) return false;
+
+            skipPlayer(false);
+
+            return true;
+        }, server).whenComplete((_, error) -> {
+            if (error != null) {
+                logger.error("Failed to skip the current player", error);
+            }
+        });
     }
 
     public boolean isCurrentPlayer(ServerPlayer player) {

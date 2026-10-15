@@ -220,7 +220,7 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
         queue.restore(getQueuePath());
 
         if (config.getCurrentPlayer() < 0) {
-            chooseInitialPlayer(queue, config, messenger);
+            chooseInitialPlayer(queue, configManager, messenger);
         }
 
         config.getCurrentPlayerEntry().ifPresent(queue::sync);
@@ -228,7 +228,9 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
         return queue;
     }
 
-    private void chooseInitialPlayer(PlayerQueue queue, Config config, Messenger messenger) {
+    private void chooseInitialPlayer(PlayerQueue queue, ConfigManager<Config> configManager, Messenger messenger) {
+        Config config = configManager.config();
+
         LOGGER.info("It's nobody turn currently, choosing initial participant entry...");
 
         PlayerEntry initial = queue.next();
@@ -243,6 +245,9 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
         }
 
         config.setCurrentPlayer(index);
+
+        // persist immediately, the config file auto-reloads and would otherwise revert the chosen player
+        configManager.save();
 
         queue.save(getQueuePath());
 

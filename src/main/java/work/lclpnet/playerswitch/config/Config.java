@@ -78,7 +78,7 @@ public class Config {
     }
 
     public Optional<PlayerEntry> getCurrentPlayerEntry() {
-        if (participants.isEmpty()) {
+        if (currentPlayer < 0 || currentPlayer >= participants.size()) {
             return Optional.empty();
         }
 

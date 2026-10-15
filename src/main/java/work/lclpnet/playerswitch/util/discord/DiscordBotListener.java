@@ -54,30 +54,39 @@ public class DiscordBotListener extends ListenerAdapter {
     }
 
     private void onSkipButton(ButtonInteractionEvent event) {
+        SwitchManager switchManager = this.switchManager;
+
+        if (switchManager == null) return;
+
         PlayerEntry currentPlayerEntry = configManager.config().getCurrentPlayerEntry().orElse(null);
 
-        if (currentPlayerEntry == null
-                || validateIsCurrentPlayer(event, currentPlayerEntry)
-                || validateNotCurrentlyPlaying(event)) return;
+        if (currentPlayerEntry == null || validateIsCurrentPlayer(event, currentPlayerEntry)) return;
 
         String lang = getLanguageOfDiscordUser(event.getUser().getId());
 
-        String title = translations.translate(lang, "player-switch.discord.confirm_skip");
-        String confirmLabel = translations.translate(lang, "player-switch.discord.confirm_label");
-        String confirmText = translations.translate(lang, "player-switch.discord.confirm_text", CONFIRM_VALUE);
+        switchManager.isNobodyPlayingSafe().thenAccept(nobodyPlaying -> {
+            if (!nobodyPlaying) {
+                replyCannotSkip(event, lang);
+                return;
+            }
 
-        var modal = Modal.create(SKIP_CONFIRM_MODAL_ID, title)
-                .addComponents(
-                        Label.of(confirmLabel, TextInput.create(CONFIRM_INPUT_ID, TextInputStyle.SHORT)
-                                .setRequired(true)
-                                .setPlaceholder(confirmText)
-                                .setRequiredRange(CONFIRM_VALUE.length(), CONFIRM_VALUE.length())
-                                .build()
-                        )
-                )
-                .build();
+            String title = translations.translate(lang, "player-switch.discord.confirm_skip");
+            String confirmLabel = translations.translate(lang, "player-switch.discord.confirm_label");
+            String confirmText = translations.translate(lang, "player-switch.discord.confirm_text", CONFIRM_VALUE);
 
-        event.replyModal(modal).queue();
+            var modal = Modal.create(SKIP_CONFIRM_MODAL_ID, title)
+                    .addComponents(
+                            Label.of(confirmLabel, TextInput.create(CONFIRM_INPUT_ID, TextInputStyle.SHORT)
+                                    .setRequired(true)
+                                    .setPlaceholder(confirmText)
+                                    .setRequiredRange(CONFIRM_VALUE.length(), CONFIRM_VALUE.length())
+                                    .build()
+                            )
+                    )
+                    .build();
+
+            event.replyModal(modal).queue();
+        });
     }
 
     private void onSkipConfirm(ModalInteractionEvent event) {
@@ -90,9 +99,7 @@ public class DiscordBotListener extends ListenerAdapter {
 
         PlayerEntry currentPlayerEntry = configManager.config().getCurrentPlayerEntry().orElse(null);
 
-        if (currentPlayerEntry == null
-                || validateIsCurrentPlayer(event, currentPlayerEntry)
-                || validateNotCurrentlyPlaying(event)) return;
+        if (currentPlayerEntry == null || validateIsCurrentPlayer(event, currentPlayerEntry)) return;
 
         String lang = getLanguageOfDiscordUser(event.getUser().getId());
 
@@ -102,17 +109,22 @@ public class DiscordBotListener extends ListenerAdapter {
             return;
         }
 
-        switchManager.skipPlayer(false);
+        switchManager.skipIfNobodyPlaying().thenAccept(skipped -> {
+            if (!skipped) {
+                replyCannotSkip(event, lang);
+                return;
+            }
 
-        Message message = event.getMessage();
+            Message message = event.getMessage();
 
-        if (message != null) {
-            message.editMessageComponents().queue();
-        }
+            if (message != null) {
+                message.editMessageComponents().queue();
+            }
 
-        String msg = translations.translate(lang, "player-switch.discord.skipped");
+            String msg = translations.translate(lang, "player-switch.discord.skipped");
 
-        event.reply(msg).queue();
+            event.reply(msg).queue();
+        });
     }
 
     private boolean validateIsCurrentPlayer(IReplyCallback event, PlayerEntry playerEntry) {
@@ -137,18 +149,9 @@ public class DiscordBotListener extends ListenerAdapter {
                 .orElse("en_us");
     }
 
-    private boolean validateNotCurrentlyPlaying(IReplyCallback event) {
-        SwitchManager switchManager = this.switchManager;
-
-        if (switchManager == null) return true;
-
-        if (switchManager.isNobodyPlaying()) return false;
-
-        String lang = getLanguageOfDiscordUser(event.getUser().getId());
+    private void replyCannotSkip(IReplyCallback event, String lang) {
         String msg = translations.translate(lang, "player-switch.discord.cannot_skip");
 
         event.reply(msg).queue();
-
-        return true;
     }
 }
