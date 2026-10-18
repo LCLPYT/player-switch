@@ -12,7 +12,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.config.ConfigManager;
 import work.lclpnet.kibu.translate.Translations;
-import work.lclpnet.kibu.translate.util.LocaleUtil;
 import work.lclpnet.playerswitch.config.Config;
 import work.lclpnet.playerswitch.config.DiscordBotConfig;
 import work.lclpnet.playerswitch.config.PlayerEntry;
@@ -20,10 +19,6 @@ import work.lclpnet.playerswitch.util.StatusTexts;
 import work.lclpnet.playerswitch.util.SwitchManager;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
@@ -142,16 +137,13 @@ public class DiscordBot {
         if (discordId.isBlank()) return;
 
         String language = playerEntry.getSafeLanguage();
-        Locale locale = LocaleUtil.getLocale(language);
-
         Config config = configManager.config();
 
-        var deadline = Instant.now().plusSeconds(config.getTurnTimeoutSeconds());
-        var dateFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
-                .withLocale(locale)
-                .withZone(ZoneId.systemDefault());
+        long remainingTicks = Math.max(0, config.getTurnTimeoutSeconds() * 20 - config.getTicksSinceLastSwitch());
+        long deadline = Instant.now().plusMillis(remainingTicks * 50).getEpochSecond();
 
-        String deadlineFormatted = dateFormatter.format(deadline);
+        // discord native timestamp
+        String deadlineFormatted = "<t:%d:f> (<t:%d:R>)".formatted(deadline, deadline);
 
         String skipLabel = translations.translate(language, "player-switch.discord.skip_turn_label");
         String msg = translations.translate(language, messageKey, deadlineFormatted, skipLabel);

@@ -58,7 +58,7 @@ public class TurnTimeout {
         long ticksSinceLastSwitch = config.getTicksSinceLastSwitch();
         long ticksUntilSkip = turnTimeoutTicks - ticksSinceLastSwitch;
 
-        if (ticksUntilSkip < REMINDER_MIN_REMAINING_SECONDS) return;
+        if (ticksUntilSkip < REMINDER_MIN_REMAINING_SECONDS * 20) return;
 
         long turnReminderTicks = max(60, turnReminderSeconds) * 20;
 
