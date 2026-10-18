@@ -6,6 +6,8 @@ import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import org.jetbrains.annotations.Nullable;
@@ -26,18 +28,23 @@ import java.util.function.UnaryOperator;
 public class DiscordBot {
 
     public static final String SKIP_TURN_BUTTON_ID = "skip_turn";
+    private static final ErrorHandler IGNORE_UNKNOWN_MESSAGE = new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE);
     private final ConfigManager<Config> configManager;
     private final Translations translations;
     private final StatusTexts statusTexts;
     private final Logger logger;
+    private final TurnMessageStore turnMessages;
     private @Nullable JDA jda = null;
     private @Nullable DiscordBotListener listener = null;
     private boolean ready = false;
+    private final Object interactionLock = new Object();
 
-    public DiscordBot(ConfigManager<Config> configManager, Translations translations, StatusTexts statusTexts, Logger logger) {
+    public DiscordBot(ConfigManager<Config> configManager, Translations translations, StatusTexts statusTexts,
+                      TurnMessageStore turnMessages, Logger logger) {
         this.configManager = configManager;
         this.translations = translations;
         this.statusTexts = statusTexts;
+        this.turnMessages = turnMessages;
         this.logger = logger;
     }
 
@@ -110,22 +117,28 @@ public class DiscordBot {
     }
 
     private void storeMessageReference(Message sentMsg, String userId) {
-        // need to get the fresh instance of the player entry, since the instance could have been swapped since
-        PlayerEntry freshEntry = configManager.config().getPlayerEntryByDiscordId(userId).orElse(null);
+        // the turn may have ended before the message was sent, in which case nobody would clean it up
+        synchronized (interactionLock) {
+            boolean stillCurrent = configManager.config().getCurrentPlayerEntry()
+                    .map(entry -> userId.equals(entry.getDiscordId()))
+                    .orElse(false);
 
-        if (freshEntry == null) return;
+            if (!stillCurrent) {
+                cleanupTurnNotification(sentMsg);
+                return;
+            }
 
-        freshEntry.setLastInteractionMessageId(sentMsg.getId());
-        configManager.save();
+            turnMessages.put(userId, sentMsg.getId());
+        }
     }
 
     public void sendTurnNotification(PlayerEntry playerEntry) {
-        removeSkipButtonFromLastInteraction(playerEntry);
+        cleanupLastTurnNotification(playerEntry);
         sendTurnNotification(playerEntry, "player-switch.discord.your_turn");
     }
 
     public void sendTurnReminder(PlayerEntry playerEntry) {
-        modifyLastInteraction(playerEntry, msg -> msg.delete().queue());
+        modifyLastInteraction(playerEntry, msg -> msg.delete().queue(null, IGNORE_UNKNOWN_MESSAGE));
         sendTurnNotification(playerEntry, "player-switch.discord.turn_reminder");
     }
 
@@ -209,27 +222,39 @@ public class DiscordBot {
         }
     }
 
-    public void removeSkipButtonFromLastInteraction(PlayerEntry playerEntry) {
-        modifyLastInteraction(playerEntry, msg -> msg.editMessageComponents().queue());
+    public void cleanupLastTurnNotification(PlayerEntry playerEntry) {
+        modifyLastInteraction(playerEntry, this::cleanupTurnNotification);
+    }
+
+    private void cleanupTurnNotification(Message msg) {
+        if (botConfig().isDeleteTurnNotifications()) {
+            msg.delete().queue(null, IGNORE_UNKNOWN_MESSAGE);
+        } else {
+            msg.editMessageComponents().queue(null, IGNORE_UNKNOWN_MESSAGE);
+        }
     }
 
     public void modifyLastInteraction(PlayerEntry playerEntry, Consumer<Message> action) {
         String userId = playerEntry.getDiscordId();
-        String messageId = playerEntry.getLastInteractionMessageId();
-
         var jda = this.jda;
 
-        if (!ready || jda == null || userId.isBlank() || messageId.isBlank()) return;
+        if (!ready || jda == null || userId.isBlank()) return;
+
+        String messageId;
+
+        synchronized (interactionLock) {
+            messageId = turnMessages.take(userId);
+        }
+
+        if (messageId == null || messageId.isBlank()) return;
 
         try {
             jda.retrieveUserById(userId)
                     .queue(user -> user.openPrivateChannel()
                             .queue(channel -> channel.retrieveMessageById(messageId)
-                                    .queue(action)));
+                                    .queue(action, IGNORE_UNKNOWN_MESSAGE)));
         } catch (Throwable t) {
             logger.error("Failed to send discord direct message to user '{}'", userId, t);
         }
-
-        playerEntry.setLastInteractionMessageId("");
     }
 }

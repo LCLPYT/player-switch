@@ -135,6 +135,9 @@ German text to show...
     #The time in seconds after which a reminder about the current turn will be sent.
     #Will be clamped to at least 60 seconds. Set to -1 to disable reminders.
     turnReminderSeconds = 129600
+
+    #Whether to delete turn notifications once the turn is over.
+    deleteTurnNotifications = true
 ```
 
 ## Troubleshooting

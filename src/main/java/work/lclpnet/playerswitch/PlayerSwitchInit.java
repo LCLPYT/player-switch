@@ -26,6 +26,7 @@ import work.lclpnet.playerswitch.hook.CodeOfConductCallback;
 import work.lclpnet.playerswitch.util.*;
 import work.lclpnet.playerswitch.util.discord.DiscordBot;
 import work.lclpnet.playerswitch.util.discord.DiscordWebhook;
+import work.lclpnet.playerswitch.util.discord.TurnMessageStore;
 import work.lclpnet.playerswitch.util.msg.Messenger;
 import work.lclpnet.playerswitch.util.queue.PlayerQueue;
 import work.lclpnet.playerswitch.util.queue.RepeatingPlayerQueue;
@@ -69,7 +70,10 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
         var statusTexts = new StatusTexts(translations, configManager, playerUtil, LOGGER);
 
         var discordWebhook = new DiscordWebhook(configManager, client, translations, playerUtil, LOGGER);
-        var discordBot = new DiscordBot(configManager, translations, statusTexts, LOGGER);
+        var turnMessages = new TurnMessageStore(getTurnMessagesPath(), LOGGER);
+        turnMessages.load();
+
+        var discordBot = new DiscordBot(configManager, translations, statusTexts, turnMessages, LOGGER);
 
         discordBot.setup().join();
 
@@ -126,6 +130,7 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
             if (doResetRun) {
                 resetRun(configManager.config());
+                turnMessages.clear();
             }
 
 			configManager.save();
@@ -287,6 +292,12 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
         return FabricLoader.getInstance().getConfigDir()
                 .resolve(MOD_ID)
                 .resolve("queue.json");
+    }
+
+    public static @NotNull Path getTurnMessagesPath() {
+        return FabricLoader.getInstance().getConfigDir()
+                .resolve(MOD_ID)
+                .resolve("turn_messages.json");
     }
 
 	private static Translations getTranslations() {

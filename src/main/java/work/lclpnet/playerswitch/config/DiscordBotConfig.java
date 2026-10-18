@@ -23,4 +23,7 @@ public class DiscordBotConfig {
 
     @SerdeComment("The time in seconds after which a reminder about the current turn will be sent. Will be clamped to at least 60 seconds. Set to -1 to disable reminders.")
     private long turnReminderSeconds = TimeUnit.HOURS.toSeconds(36);
+
+    @SerdeComment("Whether to delete turn notifications once the turn is over.")
+    private boolean deleteTurnNotifications = true;
 }

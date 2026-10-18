@@ -28,7 +28,7 @@ public class Messenger {
     }
 
     public void onTurnOver(PlayerEntry playerEntry) {
-        discordBot.removeSkipButtonFromLastInteraction(playerEntry);
+        discordBot.cleanupLastTurnNotification(playerEntry);
     }
 
     public void sendTurnReminder(PlayerEntry playerEntry) {

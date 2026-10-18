@@ -75,10 +75,6 @@ public class Config {
         setTurnDeadline(0);
         setNextTurnReminder(0);
         setTurnCount(1);
-
-        for (PlayerEntry entry : participants) {
-            entry.reset();
-        }
     }
 
     public Optional<PlayerEntry> getCurrentPlayerEntry() {

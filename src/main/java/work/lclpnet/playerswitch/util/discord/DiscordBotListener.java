@@ -4,7 +4,6 @@ import lombok.Setter;
 import net.dv8tion.jda.api.components.label.Label;
 import net.dv8tion.jda.api.components.textinput.TextInput;
 import net.dv8tion.jda.api.components.textinput.TextInputStyle;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -113,12 +112,6 @@ public class DiscordBotListener extends ListenerAdapter {
             if (!skipped) {
                 replyCannotSkip(event, lang);
                 return;
-            }
-
-            Message message = event.getMessage();
-
-            if (message != null) {
-                message.editMessageComponents().queue();
             }
 
             String msg = translations.translate(lang, "player-switch.discord.skipped");
