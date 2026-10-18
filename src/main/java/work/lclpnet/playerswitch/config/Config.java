@@ -50,8 +50,11 @@ public class Config {
     @SerdeComment("Player ordering type to use")
     private final QueueType queueType = QueueType.BALANCED_RANDOM;
 
-    @SerdeComment("Ticks since the last switch.")
-    private long ticksSinceLastSwitch = 0;
+    @SerdeComment("Unix timestamp in milliseconds after which the current player will be skipped. Set automatically on every switch.")
+    private long turnDeadline = 0;
+
+    @SerdeComment("Unix timestamp in milliseconds at which the next turn reminder will be sent. Set automatically.")
+    private long nextTurnReminder = 0;
 
     @SerdeComment("Turn timeout in seconds. If the current player does not play their turn within the timeout, the player will be skipped.")
     private long turnTimeoutSeconds = TimeUnit.DAYS.toSeconds(3);
@@ -69,7 +72,8 @@ public class Config {
         setCurrentPlayer(-1);
         setElapsedTicks(0);
         setTotalTicks(0);
-        setTicksSinceLastSwitch(0);
+        setTurnDeadline(0);
+        setNextTurnReminder(0);
         setTurnCount(1);
 
         for (PlayerEntry entry : participants) {

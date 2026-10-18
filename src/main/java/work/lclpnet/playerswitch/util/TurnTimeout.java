@@ -7,62 +7,72 @@ import work.lclpnet.playerswitch.config.DiscordBotConfig;
 import work.lclpnet.playerswitch.config.PlayerEntry;
 import work.lclpnet.playerswitch.util.msg.Messenger;
 
-import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.max;
 
 public class TurnTimeout {
 
-    public static final long REMINDER_MIN_REMAINING_SECONDS = TimeUnit.MINUTES.toSeconds(30);
+    public static final long REMINDER_MIN_REMAINING_MILLIS = TimeUnit.MINUTES.toMillis(30);
 
     private final ConfigManager<Config> configManager;
     private final Messenger messenger;
     private final Logger logger;
-    private final Runnable switchAction;
 
-    public TurnTimeout(ConfigManager<Config> configManager, Messenger messenger, Logger logger, Runnable switchAction) {
+    public TurnTimeout(ConfigManager<Config> configManager, Messenger messenger, Logger logger) {
         this.configManager = configManager;
         this.messenger = messenger;
         this.logger = logger;
-        this.switchAction = switchAction;
     }
 
-    public void tick() {
+    public void start() {
         Config config = configManager.config();
+        long now = System.currentTimeMillis();
 
-        Calendar instance = Calendar.getInstance();
-        instance.get(Calendar.SECOND);
+        config.setTurnDeadline(now + TimeUnit.SECONDS.toMillis(config.getTurnTimeoutSeconds()));
+        config.setNextTurnReminder(nextReminder(now));
+    }
 
-        long ticksSinceLastSwitch = config.getTicksSinceLastSwitch() + 1;
+    private long nextReminder(long now) {
+        long turnReminderSeconds = configManager.config().getDiscordBot().getTurnReminderSeconds();
 
-        config.setTicksSinceLastSwitch(ticksSinceLastSwitch);
+        if (turnReminderSeconds <= 0) return 0;
 
-        checkReminders();
+        return now + TimeUnit.SECONDS.toMillis(max(60, turnReminderSeconds));
+    }
 
-        if (ticksSinceLastSwitch < config.getTurnTimeoutSeconds() * 20) return;
+    public boolean tick() {
+        Config config = configManager.config();
+        long deadline = config.getTurnDeadline();
+
+        if (deadline <= 0) return false;
+
+        long now = System.currentTimeMillis();
+
+        checkReminders(config, now, deadline);
+
+        if (now < deadline) return false;
 
         logger.info("Turn timeout was reached.");
-        switchAction.run();
+
+        return true;
     }
 
-    private void checkReminders() {
-        Config config = configManager.config();
+    private void checkReminders(Config config, long now, long deadline) {
         DiscordBotConfig discordBot = config.getDiscordBot();
 
-        long turnReminderSeconds = discordBot.getTurnReminderSeconds();
+        if (!discordBot.isEnabled() || discordBot.getTurnReminderSeconds() <= 0) return;
 
-        if (!discordBot.isEnabled() || turnReminderSeconds <= 0) return;
+        long nextReminder = config.getNextTurnReminder();
 
-        long turnTimeoutTicks = config.getTurnTimeoutSeconds() * 20;
-        long ticksSinceLastSwitch = config.getTicksSinceLastSwitch();
-        long ticksUntilSkip = turnTimeoutTicks - ticksSinceLastSwitch;
+        if (nextReminder > 0 && now < nextReminder) return;
 
-        if (ticksUntilSkip < REMINDER_MIN_REMAINING_SECONDS * 20) return;
+        config.setNextTurnReminder(nextReminder(now));
 
-        long turnReminderTicks = max(60, turnReminderSeconds) * 20;
+        // persist immediately, the config file auto-reloads and would otherwise revert the reminder timestamp
+        configManager.save();
 
-        if (ticksSinceLastSwitch % turnReminderTicks != 0) return;
+        if (nextReminder <= 0 || deadline - now < REMINDER_MIN_REMAINING_MILLIS) return;
 
         PlayerEntry playerEntry = config.getCurrentPlayerEntry().orElse(null);
 

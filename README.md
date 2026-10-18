@@ -59,8 +59,11 @@ currentPlayer = 0
 #The time the current player has already played, in ticks
 elapsedTicks = 0
 
-#Ticks since the last switch.
-ticksSinceLastSwitch = 0
+#Unix timestamp in milliseconds after which the current player will be skipped. Set automatically on every switch.
+turnDeadline = 0
+
+#Unix timestamp in milliseconds at which the next turn reminder will be sent. Set automatically.
+nextTurnReminder = 0
 
 #Turn count. Increments with every player switch
 turnCount = 1

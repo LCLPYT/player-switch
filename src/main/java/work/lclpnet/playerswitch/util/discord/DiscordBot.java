@@ -18,8 +18,8 @@ import work.lclpnet.playerswitch.config.PlayerEntry;
 import work.lclpnet.playerswitch.util.StatusTexts;
 import work.lclpnet.playerswitch.util.SwitchManager;
 
-import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
@@ -137,10 +137,7 @@ public class DiscordBot {
         if (discordId.isBlank()) return;
 
         String language = playerEntry.getSafeLanguage();
-        Config config = configManager.config();
-
-        long remainingTicks = Math.max(0, config.getTurnTimeoutSeconds() * 20 - config.getTicksSinceLastSwitch());
-        long deadline = Instant.now().plusMillis(remainingTicks * 50).getEpochSecond();
+        long deadline = TimeUnit.MILLISECONDS.toSeconds(configManager.config().getTurnDeadline());
 
         // discord native timestamp
         String deadlineFormatted = "<t:%d:f> (<t:%d:R>)".formatted(deadline, deadline);

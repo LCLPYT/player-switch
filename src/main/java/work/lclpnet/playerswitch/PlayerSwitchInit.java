@@ -75,7 +75,9 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
         var messenger = new Messenger(discordWebhook, discordBot);
 
-        var queue = loadQueue(configManager, messenger);
+        var turnTimeout = new TurnTimeout(configManager, messenger, LOGGER);
+
+        var queue = loadQueue(configManager, messenger, turnTimeout);
 
         AtomicBoolean resetRun = new AtomicBoolean(false);
 
@@ -89,7 +91,7 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
 
             statusTexts.setPlayerManager(server.getPlayerList());
 
-            var manager = new SwitchManager(configManager, playerUtil, translations, server, messenger, LOGGER, statusTexts, queue);
+            var manager = new SwitchManager(configManager, playerUtil, translations, server, messenger, LOGGER, statusTexts, queue, turnTimeout);
 
             boolean setupSuccess = manager.setup(scheduler, hooks);
 
@@ -213,7 +215,7 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
         playerUtil.getSafeUsername(playerEntry).thenAccept(name -> LOGGER.info("Currently, it's {}'s turn", name));
     }
 
-    private PlayerQueue loadQueue(ConfigManager<Config> configManager, Messenger messenger) {
+    private PlayerQueue loadQueue(ConfigManager<Config> configManager, Messenger messenger, TurnTimeout turnTimeout) {
         var config = configManager.config();
         var participants = config.getParticipants();
 
@@ -225,7 +227,7 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
         queue.restore(getQueuePath());
 
         if (config.getCurrentPlayer() < 0) {
-            chooseInitialPlayer(queue, configManager, messenger);
+            chooseInitialPlayer(queue, configManager, messenger, turnTimeout);
         }
 
         config.getCurrentPlayerEntry().ifPresent(queue::sync);
@@ -233,7 +235,7 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
         return queue;
     }
 
-    private void chooseInitialPlayer(PlayerQueue queue, ConfigManager<Config> configManager, Messenger messenger) {
+    private void chooseInitialPlayer(PlayerQueue queue, ConfigManager<Config> configManager, Messenger messenger, TurnTimeout turnTimeout) {
         Config config = configManager.config();
 
         LOGGER.info("It's nobody turn currently, choosing initial participant entry...");
@@ -250,6 +252,7 @@ public class PlayerSwitchInit implements DedicatedServerModInitializer {
         }
 
         config.setCurrentPlayer(index);
+        turnTimeout.start();
 
         // persist immediately, the config file auto-reloads and would otherwise revert the chosen player
         configManager.save();

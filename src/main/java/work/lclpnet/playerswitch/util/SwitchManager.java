@@ -58,7 +58,7 @@ public class SwitchManager {
 
     public SwitchManager(ConfigManager<Config> configManager, PlayerUtil playerUtil, Translations translations,
                          MinecraftServer server, Messenger messenger, Logger logger, StatusTexts statusTexts,
-                         PlayerQueue queue) {
+                         PlayerQueue queue, TurnTimeout turnTimeout) {
 
         this.configManager = configManager;
         this.config = configManager.config();
@@ -71,7 +71,7 @@ public class SwitchManager {
         this.queue = queue;
 
         motd = new ServerMotd(server, translations, configManager, statusTexts);
-        turnTimeout = new TurnTimeout(configManager, messenger, logger, this::skipPlayer);
+        this.turnTimeout = turnTimeout;
     }
 
     public boolean setup(TaskScheduler scheduler, HookRegistrar hooks) {
@@ -93,6 +93,10 @@ public class SwitchManager {
         ServerLifecycleEvents.BEFORE_SAVE.register(this::onBeforeSave);
 
         scheduler.interval(this::tick, 1);
+
+        if (config.getTurnDeadline() <= 0) {
+            turnTimeout.start();
+        }
 
         update();
 
@@ -127,8 +131,8 @@ public class SwitchManager {
     private boolean shouldPause(MinecraftServer s) {
         boolean shouldPause = isNobodyPlaying();
 
-        if (shouldPause) {
-            turnTimeout.tick();
+        if (shouldPause && turnTimeout.tick()) {
+            skipPlayer();
         }
 
         return shouldPause;
@@ -268,7 +272,7 @@ public class SwitchManager {
     }
 
     private void switchPlayer(boolean skipped) {
-        config.setTicksSinceLastSwitch(0);
+        turnTimeout.start();
         doSwitchPlayer(skipped);
         update();
     }
